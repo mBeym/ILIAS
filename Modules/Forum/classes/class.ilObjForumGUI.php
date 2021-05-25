@@ -2837,7 +2837,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             );
         }
 
-        $threadContentTemplate->setVariable('LIST_TYPE', $this->viewModeOptions[$this->selectedSorting]);
+        $threadContentTemplate->setVariable('LIST_TYPE', $this->viewModeOptions[$this->selectedSorting] ?? null);
 
         $numberOfPostings = 0;
 
@@ -3161,8 +3161,8 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
 
         $sortViewControl = $this->uiFactory
             ->viewControl()
-            ->mode($translationKeys, $this->lng->txt($this->viewModeOptions[$currentViewMode]))
-            ->withActive($this->lng->txt($this->viewModeOptions[$currentViewMode]));
+            ->mode($translationKeys, $this->lng->txt($this->viewModeOptions[$currentViewMode] ?? null))
+            ->withActive($this->lng->txt($this->viewModeOptions[$currentViewMode] ?? null));
         $this->toolbar->addComponent($sortViewControl);
     }
 
