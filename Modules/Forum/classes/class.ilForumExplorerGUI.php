@@ -232,7 +232,7 @@ class ilForumExplorerGUI extends ilTreeExplorerGUI
      */
     public function getNodeId($a_node)
     {
-        return $a_node['pos_pk'];
+        return $a_node['pos_pk'] ?? null;
     }
 
     /**
