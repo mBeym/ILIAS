@@ -21,6 +21,7 @@ class ilForum
      * @var array
      */
     protected static $moderators_by_ref_id_map = array();
+    protected string $import_name = "";
 
     public $lng;
     public $error;
