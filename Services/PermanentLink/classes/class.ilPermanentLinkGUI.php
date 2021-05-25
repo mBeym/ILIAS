@@ -9,6 +9,7 @@
  */
 class ilPermanentLinkGUI
 {
+    protected string $title = "";
     /**
      * @var ilLanguage
      */
