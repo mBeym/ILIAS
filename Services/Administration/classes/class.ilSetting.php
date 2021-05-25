@@ -234,7 +234,7 @@ class ilSetting
         $query = "SELECT value FROM settings WHERE module = %s AND keyword = %s";
         $res = $ilDB->queryF($query, array('text', 'text'), array($a_module, $a_keyword));
         $data = $ilDB->fetchAssoc($res);
-        return $data['value'];
+        return $data['value'] ?? null;
     }
 
     /**
