@@ -2609,7 +2609,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             $this->error->raiseError($this->lng->txt('permission_denied'), $this->error->MESSAGE);
         }
 
-        if (!is_array($_POST['del_file'])) {
+        if (!isset($this->request->getParsedBody()['del_file']) || !is_array($this->request->getParsedBody()['del_file'])) {
             $_POST['del_file'] = array();
         }
 
