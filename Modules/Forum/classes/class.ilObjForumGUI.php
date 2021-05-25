@@ -2132,7 +2132,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             );
         }
 
-        if ($draft_obj instanceof ilForumPostDraft && $draft_obj->getDraftId() > 0) {
+        if (!empty($draft_obj) && $draft_obj instanceof ilForumPostDraft && $draft_obj->getDraftId() > 0) {
             $this->ctrl->setParameter($this, 'action', 'editdraft');
             $this->ctrl->setParameter($this, 'pos_pk', $this->objCurrentPost->getId());
             $this->ctrl->setParameter($this, 'thr_pk', $this->objCurrentTopic->getId());
