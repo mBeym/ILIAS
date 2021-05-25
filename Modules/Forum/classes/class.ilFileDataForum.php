@@ -40,7 +40,7 @@ class ilFileDataForum extends ilFileData
         global $DIC;
         $this->error = $DIC['ilErr'];
         
-        define('FORUM_PATH', 'forum');
+        if(!defined('FORUM_PATH')) define('FORUM_PATH', 'forum');
         parent::__construct();
         $this->forum_path = parent::getPath() . "/" . FORUM_PATH;
         
