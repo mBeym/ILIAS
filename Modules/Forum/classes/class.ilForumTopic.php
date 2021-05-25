@@ -93,14 +93,14 @@ class ilForumTopic
         $this->setSubject($data['thr_subject']);
         $this->setDisplayUserId((int) $data['thr_display_user_id']);
         $this->setUserAlias($data['thr_usr_alias']);
-        $this->setLastPostString($data['last_post_string']);
+        $this->setLastPostString($data['last_post_string'] ?? null);
         $this->setCreateDate($data['thr_date']);
         $this->setChangeDate($data['thr_update']);
         $this->setVisits((int) $data['visits']);
         $this->setImportName($data['import_name']);
         $this->setSticky((int) $data['is_sticky']);
         $this->setClosed((int) $data['is_closed']);
-        $this->setAverageRating($data['avg_rating']);
+        $this->setAverageRating($data['avg_rating'] ?? 0);
         $this->setThrAuthorId($data['thr_author_id']);
 
         // Aggregated values
