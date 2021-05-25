@@ -2903,7 +2903,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                 $this->ctrl->setParameter($this, 'action', 'showreply');
                 $this->ctrl->setParameter($this, 'pos_pk', $firstNodeInThread->getId());
                 $this->ctrl->setParameter($this, 'thr_pk', $this->objCurrentTopic->getId());
-                $this->ctrl->setParameter($this, 'page', (int) $this->httpRequest->getQueryParams()['page']);
+                $this->ctrl->setParameter($this, 'page', (int) ($this->httpRequest->getQueryParams()['page'] ?? 0));
                 $this->ctrl->setParameter(
                     $this,
                     'orderby',
