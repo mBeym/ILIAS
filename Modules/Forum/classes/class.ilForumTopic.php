@@ -209,7 +209,7 @@ class ilForumTopic
             $row = $res->fetchRow(ilDBConstants::FETCHMODE_OBJECT);
 
             if (is_object($row)) {
-                $this->thr_pk = $row->pos_pk;   // thr_pk = pos_pk ??!??!
+                $this->thr_pk = $row->thr_pk;
                 $this->forum_id = $row->thr_top_fk;
                 $this->display_user_id = $row->thr_display_user_id;
                 $this->user_alias = $row->thr_usr_alias;
