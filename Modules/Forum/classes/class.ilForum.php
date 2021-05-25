@@ -1441,7 +1441,7 @@ class ilForum
     */
     public static function _isModerator($a_ref_id, $a_usr_id)
     {
-        if (!self::$moderators_by_ref_id_map[$a_ref_id]) {
+        if (!isset(self::$moderators_by_ref_id_map[$a_ref_id])) {
             self::$moderators_by_ref_id_map[$a_ref_id] = self::_getModerators($a_ref_id);
         }
         return in_array($a_usr_id, self::$moderators_by_ref_id_map[$a_ref_id]);

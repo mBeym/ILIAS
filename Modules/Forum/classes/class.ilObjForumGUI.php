@@ -220,7 +220,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                 $this->ctrl->setParameter(
                     $this,
                     'orderby',
-                    ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                    ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                 );
                 $this->ctrl->redirect($this, 'viewThread', $this->objCurrentPost->getId());
             }
@@ -1122,7 +1122,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             $this->ctrl->setParameter(
                 $this,
                 'orderby',
-                ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
             );
             $this->ctrl->setParameter($this, 'viewmode', $this->selectedSorting);
             $mark_post_target = $this->ctrl->getLinkTarget($this, 'markPostRead', $node->getId());
@@ -1785,7 +1785,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
         $this->ctrl->setParameter(
             $this,
             'orderby',
-            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
         );
         $form_tpl->setVariable('FORM_ACTION', $this->ctrl->getFormAction($this, 'performPostActivation'));
         $form_tpl->setVariable('SPACER', '<hr noshade="noshade" width="100%" size="1" align="center" />');
@@ -1812,7 +1812,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
         $this->ctrl->setParameter(
             $this,
             'orderby',
-            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
         );
         $form_tpl->setVariable('FORM_ACTION', $this->ctrl->getFormAction($this, 'viewThread'));
         $this->ctrl->clearParameters($this);
@@ -1868,7 +1868,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
         $this->ctrl->setParameter(
             $this,
             'orderby',
-            \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+            \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
         );
         $this->ctrl->setParameter($this, 'pos_pk', $this->objCurrentPost->getId());
         $this->ctrl->setParameter($this, 'thr_pk', $this->objCurrentPost->getThreadId());
@@ -2141,7 +2141,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             $this->ctrl->setParameter(
                 $this,
                 'orderby',
-                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
             );
             $this->ctrl->redirect($this, 'editDraft');
         } else {
@@ -2929,7 +2929,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                 $this->ctrl->setParameter(
                     $this,
                     'orderby',
-                    ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                    ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                 );
                 $paginationUrl = $this->ctrl->getLinkTarget($this, 'viewThread', '', false, false);
                 $this->ctrl->clearParameters($this);
@@ -5131,7 +5131,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $this->ctrl->setParameter(
                             $this,
                             'orderby',
-                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                         );
                         $this->ctrl->setParameter($this, 'thr_pk', $node->getThreadId());
 
@@ -5158,7 +5158,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $this->ctrl->setParameter(
                             $this,
                             'orderby',
-                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                         );
 
                         $actions['edit'] = $this->ctrl->getLinkTarget($this, 'viewThread', $node->getId());
@@ -5173,7 +5173,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $this->ctrl->setParameter(
                             $this,
                             'orderby',
-                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                         );
                         $this->ctrl->setParameter($this, 'viewmode', $this->selectedSorting);
 
@@ -5193,7 +5193,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $this->ctrl->setParameter(
                             $this,
                             'orderby',
-                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                         );
                         $this->ctrl->setParameter($this, 'viewmode', $this->selectedSorting);
 
@@ -5225,7 +5225,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $this->ctrl->setParameter(
                             $this,
                             'orderby',
-                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                         );
                         $actions['delete'] = $this->ctrl->getFormAction($this, 'deletePosting');
                         $this->ctrl->clearParameters($this);
@@ -5238,7 +5238,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $this->ctrl->setParameter(
                             $this,
                             'orderby',
-                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                         );
                         if ($node->isCensored()) {
                             $this->ctrl->setParameter($this, 'action', 'viewThread');
@@ -5255,7 +5255,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $this->ctrl->setParameter(
                             $this,
                             'orderby',
-                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                         );
 
                         if (!$node->isActivated()) {
@@ -5280,7 +5280,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             $this->ctrl->setParameter(
                 $this,
                 'orderby',
-                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
             );
             $actions['publish'] = $this->ctrl->getLinkTarget($this, 'publishSelectedDraft', $node->getId());
             $this->ctrl->clearParameters($this);
@@ -5293,7 +5293,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             $this->ctrl->setParameter(
                 $this,
                 'orderby',
-                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
             );
             $actions['edit'] = $this->ctrl->getLinkTarget($this, 'editDraft', 'draft_edit_' . $draft->getDraftId());
             $this->ctrl->clearParameters($this);
@@ -5305,7 +5305,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             $this->ctrl->setParameter(
                 $this,
                 'orderby',
-                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
             );
             $actions['delete'] = $this->ctrl->getFormAction($this, 'deletePostingDraft');
             $this->ctrl->clearParameters($this);
@@ -5609,7 +5609,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
         $this->ctrl->setParameter(
             $this,
             'orderby',
-            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+            ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
         );
         $this->ctrl->setParameter(
             $this,
