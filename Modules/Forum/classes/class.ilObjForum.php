@@ -79,7 +79,8 @@ class ilObjForum extends ilObject
         $new_deadline = time() - 60 * 60 * 24 * 7 * ($this->settings->get('frm_store_new') ?
             $this->settings->get('frm_store_new') :
             8);
-        define('NEW_DEADLINE', $new_deadline);
+
+        if(!defined("NEW_DEADLINE")) define('NEW_DEADLINE', $new_deadline);
 
         // TODO: needs to rewrite scripts that are using Forum outside this class
         $this->Forum = new ilForum();
