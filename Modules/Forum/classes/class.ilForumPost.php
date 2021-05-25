@@ -632,7 +632,7 @@ class ilForumPost
         $this->setChangeDate($row['pos_update']);
         $this->setUpdateUserId($row['update_user']);
         $this->setCensorship($row['pos_cens']);
-        $this->setCensoredDate($row['pos_cens_date']);
+        $this->setCensoredDate($row['pos_cens_date'] ?? null);
         $this->setCensorshipComment($row['pos_cens_com']);
         $this->setNotification($row['notify']);
         $this->setImportName($row['import_name']);
@@ -642,7 +642,7 @@ class ilForumPost
         $this->setLft($row['lft']);
         $this->setRgt($row['rgt']);
         $this->setDepth($row['depth']);
-        $this->setIsRead($row['post_read']);
+        $this->setIsRead($row['post_read'] ?? false);
         $this->setDisplayUserId($row['pos_display_user_id']);
         $this->setPosAuthorId($row['pos_author_id']);
         $this->setIsAuthorModerator($row['is_author_moderator']);

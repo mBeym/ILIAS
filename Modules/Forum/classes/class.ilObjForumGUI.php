@@ -2907,7 +2907,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                 $this->ctrl->setParameter(
                     $this,
                     'orderby',
-                    \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'])
+                    \ilUtil::stripSlashes($this->httpRequest->getQueryParams()['orderby'] ?? "")
                 );
 
                 $reply_button->setUrl($this->ctrl->getLinkTarget($this, 'createTopLevelPost', 'frm_page_bottom'));
