@@ -700,7 +700,7 @@ class ilInfoScreenGUI
             }
         }
 
-        return $html;
+        return $html ?? "";
     }
 
     /**
@@ -840,7 +840,7 @@ class ilInfoScreenGUI
 
         // render all sections
         for ($i = 1; $i <= $this->sec_nr; $i++) {
-            if (is_array($this->section[$i]["properties"])) {
+            if (isset($this->section[$i]["properties"]) && is_array($this->section[$i]["properties"])) {
                 // section properties
                 foreach ($this->section[$i]["properties"] as $property) {
                     if ($property["name"] != "") {
