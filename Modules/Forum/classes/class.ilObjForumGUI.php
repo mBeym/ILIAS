@@ -2067,7 +2067,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
         if (isset($_GET['draft_id']) && (int) $_GET['draft_id'] > 0) {
             $auto_save_draft_id = (int) $_GET['draft_id'];
         }
-        $hidden_draft_id->setValue($auto_save_draft_id);
+        $hidden_draft_id->setValue($auto_save_draft_id ?? 0);
         $this->replyEditForm->addItem($hidden_draft_id);
 
         if (in_array($this->requestAction, ['showreply', 'ready_showreply', 'editdraft'])) {
