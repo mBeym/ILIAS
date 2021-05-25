@@ -802,7 +802,7 @@ class ilObjForum extends ilObject
             'top_num_posts' => 0,
             'top_num_threads' => 0,
             'top_last_post' => null,
-            'top_mods' => !is_numeric($a_roles[0]) ? 0 : $a_roles[0],
+            'top_mods' => isset($a_roles[0]) && is_numeric($a_roles[0]) ? $a_roles[0] : 0,
             'top_usr_id' => $this->user->getId(),
             'top_date' => ilUtil::now()
         );

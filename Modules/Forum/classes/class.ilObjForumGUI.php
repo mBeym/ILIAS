@@ -140,8 +140,8 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
         $this->objProperties = \ilForumProperties::getInstance($this->ilObjDataCache->lookupObjId($_GET['ref_id']));
         $this->is_moderator = $this->access->checkAccess('moderate_frm', '', $_GET['ref_id']);
 
-        $this->objCurrentTopic = new ilForumTopic((int) $this->httpRequest->getQueryParams()['thr_pk'] ?? 0, $this->is_moderator);
-        $this->objCurrentPost = new ilForumPost((int) $this->httpRequest->getQueryParams()['pos_pk'] ?? 0, $this->is_moderator);
+        $this->objCurrentTopic = new ilForumTopic((int) ($this->httpRequest->getQueryParams()['thr_pk'] ?? 0), $this->is_moderator);
+        $this->objCurrentPost = new ilForumPost((int) ($this->httpRequest->getQueryParams()['pos_pk'] ?? 0), $this->is_moderator);
 
         $this->requestAction = (string) ($this->httpRequest->getQueryParams()['action'] ?? '');
         $this->checkUsersViewMode();
