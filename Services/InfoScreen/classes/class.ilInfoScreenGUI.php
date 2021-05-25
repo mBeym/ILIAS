@@ -11,6 +11,10 @@
  */
 class ilInfoScreenGUI
 {
+    private bool $hidden = false;
+    private bool $news_editing = false;
+    private array $block_property = [];
+
     /**
      * @var ilTabsGUI
      */
@@ -258,7 +262,7 @@ class ilInfoScreenGUI
     {
         $this->sec_nr++;
         $this->section[$this->sec_nr]["title"] = $a_title;
-        $this->section[$this->sec_nr]["hidden"] = (bool) $this->hidden;
+        $this->section[$this->sec_nr]["hidden"] = $this->hidden;
     }
 
     /**
@@ -440,38 +444,38 @@ class ilInfoScreenGUI
         // output
 
         // description
-        if ($description != "") {
+        if (!empty($description)) {
             $this->addSection($lng->txt("description"));
             $this->addProperty("", nl2br($description));
         }
 
         // general section
         $this->addSection($lng->txt("meta_general"));
-        if ($langs != "") {	// language
+        if (!empty($langs)) {	// language
             $this->addProperty(
                 $lng->txt("language"),
                 $langs
             );
         }
-        if ($keywords != "") {	// keywords
+        if (!empty($keywords)) {	// keywords
             $this->addProperty(
                 $lng->txt("keywords"),
                 $keywords
             );
         }
-        if ($author != "") {		// author
+        if (!empty($author)) {		// author
             $this->addProperty(
                 $lng->txt("author"),
                 $author
             );
         }
-        if ($copyright != "") {		// copyright
+        if (!empty($copyright)) {		// copyright
             $this->addProperty(
                 $lng->txt("meta_copyright"),
                 $copyright
             );
         }
-        if ($learning_time != "") {		// typical learning time
+        if (!empty($learning_time)) {		// typical learning time
             $this->addProperty(
                 $lng->txt("meta_typical_learning_time"),
                 $learning_time
