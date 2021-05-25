@@ -2034,7 +2034,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
             }
         }
 
-        $selected_draft_id = (int) $_GET['draft_id'];
+        $selected_draft_id = (int) ($this->request->getQueryParams()['draft_id'] ?? 0);
         $draftObj = new ilForumPostDraft(
             $this->user->getId(),
             $this->objCurrentPost->getId(),
