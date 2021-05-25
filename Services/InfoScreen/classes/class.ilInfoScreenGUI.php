@@ -11,9 +11,9 @@
  */
 class ilInfoScreenGUI
 {
-    private bool $hidden = false;
-    private bool $news_editing = false;
-    private array $block_property = [];
+    protected bool $hidden = false;
+    protected bool $news_editing = false;
+    protected array $block_property = [];
 
     /**
      * @var ilTabsGUI
