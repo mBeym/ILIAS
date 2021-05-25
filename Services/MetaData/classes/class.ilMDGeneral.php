@@ -52,7 +52,12 @@ class ilMDGeneral extends ilMDBase
         $ids = ilMDIdentifier::_getIds($this->getRBACId(), $this->getObjId(), $this->getMetaId(), 'meta_general');
         return $ids;
     }
-    public function &getIdentifier($a_identifier_id) : bool|ilMDIdentifier
+
+    /**
+     * @param $a_identifier_id
+     * @return bool|ilMDIdentifier
+     */
+    public function &getIdentifier($a_identifier_id)
     {
         if (!$a_identifier_id) {
             $ide = false;
@@ -81,7 +86,12 @@ class ilMDGeneral extends ilMDBase
         $ids = ilMDLanguage::_getIds($this->getRBACId(), $this->getObjId(), $this->getMetaId(), 'meta_general');
         return $ids;
     }
-    public function &getLanguage($a_language_id) : bool|ilMDLanguage
+
+    /**
+     * @param $a_language_id
+     * @return bool|ilMDLanguage
+     */
+    public function &getLanguage($a_language_id)
     {
         if (!$a_language_id) {
             $lan = false;
@@ -108,7 +118,12 @@ class ilMDGeneral extends ilMDBase
 
         return ilMDDescription::_getIds($this->getRBACId(), $this->getObjId(), $this->getMetaId(), 'meta_general');
     }
-    public function &getDescription($a_description_id) : bool|ilMDDescription
+
+    /**
+     * @param $a_description_id
+     * @return bool|ilMDDescription
+     */
+    public function &getDescription($a_description_id)
     {
         if (!$a_description_id) {
             $des = false;
@@ -136,7 +151,12 @@ class ilMDGeneral extends ilMDBase
 
         return ilMDKeyword::_getIds($this->getRBACId(), $this->getObjId(), $this->getMetaId(), 'meta_general');
     }
-    public function &getKeyword($a_keyword_id) : bool|ilMDKeyword
+
+    /**
+     * @param $a_keyword_id
+     * @return bool|ilMDKeyword
+     */
+    public function &getKeyword($a_keyword_id)
     {
         if (!$a_keyword_id) {
             $key = false;
