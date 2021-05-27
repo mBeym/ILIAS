@@ -43,7 +43,8 @@ include_once("./Services/User/classes/class.ilUserAutoComplete.php");
 class ilRepositorySearchGUI
 {
     private $search_results = array();
-    
+    protected bool $stored = false;
+
     protected $add_options = array();
     protected $object_selection = false;
 
