@@ -1,6 +1,9 @@
 <?php
 /* Copyright (c) 1998-2009 ILIAS open source, Extended GPL, see docs/LICENSE */
 
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
 include_once("./Services/Table/classes/class.ilTable2GUI.php");
 require_once('./Services/Repository/classes/class.ilObjectPlugin.php');
 
@@ -14,6 +17,10 @@ require_once('./Services/Repository/classes/class.ilObjectPlugin.php');
 */
 class ilAdminSubItemsTableGUI extends ilTable2GUI
 {
+    /**
+     * @var ServerRequestInterface|RequestInterface
+     */
+    private $request;
     /**
      * @var ilCtrl
      */
@@ -63,6 +70,7 @@ class ilAdminSubItemsTableGUI extends ilTable2GUI
         $this->rbacsystem = $DIC->rbac()->system();
         $this->obj_definition = $DIC["objDefinition"];
         $this->tree = $DIC->repositoryTree();
+        $this->request = $DIC->http()->request();
         $ilCtrl = $DIC->ctrl();
         $lng = $DIC->language();
         $ilAccess = $DIC->access();
