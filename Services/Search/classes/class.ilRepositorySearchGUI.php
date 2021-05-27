@@ -962,7 +962,8 @@ class ilRepositorySearchGUI
         include_once 'Services/Search/classes/Like/class.ilLikeObjectSearch.php';
         $object_search = new ilLikeObjectSearch($query_parser);
         $object_search->setFilter(array('grp'));
-        $this->__storeEntries($object_search->performSearch());
+        $searchResult = $object_search->performSearch();
+        $this->__storeEntries($searchResult);
 
         return true;
     }
@@ -984,7 +985,8 @@ class ilRepositorySearchGUI
         include_once 'Services/Search/classes/Like/class.ilLikeObjectSearch.php';
         $object_search = new ilLikeObjectSearch($query_parser);
         $object_search->setFilter(array('crs'));
-        $this->__storeEntries($object_search->performSearch());
+        $searchResult = $object_search->performSearch();
+        $this->__storeEntries($searchResult);
 
         return true;
     }
@@ -1002,12 +1004,13 @@ class ilRepositorySearchGUI
             ilUtil::sendInfo($query_parser, true);
             return false;
         }
-        
+
         // Perform like search
         include_once 'Services/Search/classes/Like/class.ilLikeObjectSearch.php';
         $object_search = new ilLikeObjectSearch($query_parser);
         $object_search->setFilter(array('role'));
-        $this->__storeEntries($object_search->performSearch());
+        $searchResult = $object_search->performSearch();
+        $this->__storeEntries($searchResult);
 
         return true;
     }
