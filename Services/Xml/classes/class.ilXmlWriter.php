@@ -292,7 +292,7 @@ class ilXmlWriter
             $this->xmlComment($this->genCmt);
         }
         
-        return $xmlStr;
+        return $this->xmlStr;
     }
     
     /**
