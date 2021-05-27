@@ -1038,7 +1038,7 @@ class ilRepositorySearchGUI
     // Private
     public function __loadQueries()
     {
-        if (is_array($_POST['rep_query'])) {
+        if (isset($_POST['rep_query']) && is_array($_POST['rep_query'])) {
             $_SESSION['rep_query'] = $_POST['rep_query'];
         }
     }
@@ -1047,11 +1047,11 @@ class ilRepositorySearchGUI
     public function __setSearchType()
     {
         // Update search type. Default to user search
-        if ($_POST['search_for']) {
+        if (isset($_POST['search_for'])) {
             #echo 1;
             $_SESSION['rep_search_type'] = $_POST['search_for'];
         }
-        if (!$_POST['search_for'] and !$_SESSION['rep_search_type']) {
+        if (!isset($_POST['search_for']) and !isset($_SESSION['rep_search_type'])) {
             #echo 2;
             $_SESSION['rep_search_type'] = 'usr';
         }
