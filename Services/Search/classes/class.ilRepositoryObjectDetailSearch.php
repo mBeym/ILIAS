@@ -158,8 +158,9 @@ class ilRepositoryObjectDetailSearch
         }
         
         $search->setIdFilter(array($this->getObjId()));
-        
-        $search_result->mergeEntries($search->performSearch());
+
+        $searchResultObj = $search->performSearch();
+        $search_result->mergeEntries($searchResultObj);
         
         include_once './Services/Search/classes/class.ilRepositoryObjectDetailSearchResult.php';
         $detail_search_result = new ilRepositoryObjectDetailSearchResult();
