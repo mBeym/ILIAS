@@ -1070,13 +1070,13 @@ class ilRepositorySearchGUI
 
     public function __updateResults()
     {
-        if (!$_SESSION['search_append']) {
+        if (!isset($_SESSION['search_append'])) {
             $_SESSION['rep_search'] = array();
         }
         foreach ($this->search_results as $result) {
             $_SESSION['rep_search'][$this->search_type][] = $result;
         }
-        if (!$_SESSION['rep_search'][$this->search_type]) {
+        if (!isset($_SESSION['rep_search'][$this->search_type])) {
             $_SESSION['rep_search'][$this->search_type] = array();
         } else {
             // remove duplicate entries
