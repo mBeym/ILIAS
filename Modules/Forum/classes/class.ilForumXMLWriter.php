@@ -98,7 +98,7 @@ class ilForumXMLWriter extends ilXmlWriter
         $this->xmlElement("FileUpload", null, (int) $row->file_upload_allowed);
         $this->xmlElement("UpdateUserId", null, $row->update_user);
         $this->xmlElement("UserId", null, (int) $row->top_usr_id);
-        $this->xmlElement("AuthorId", null, (int) $row->thr_author_id);
+        $this->xmlElement("AuthorId", null, (int) ($row->thr_author_id ?? 0));
 
         $query_thr = "SELECT frm_threads.* " .
                     " FROM frm_threads " .
