@@ -104,7 +104,7 @@ class ilAdminSubItemsTableGUI extends ilTable2GUI
         
 
         if (ilObject::_lookupType($this->request->getQueryParams()["ref_id"], true) != "recf") {
-            if ($_SESSION["clipboard"]) {
+            if (isset($_SESSION["clipboard"])) {
                 if ($this->isEditable()) {
                     $this->addCommandButton("paste", $lng->txt("paste"));
                     $this->addCommandButton("clear", $lng->txt("clear"));
