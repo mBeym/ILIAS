@@ -97,13 +97,13 @@ class ilAdminSubItemsTableGUI extends ilTable2GUI
         $this->setDefaultOrderDirection("asc");
         
         // TODO: Needs other solution
-        if (ilObject::_lookupType((int) $_GET['ref_id'], true) == 'chac') {
+        if (ilObject::_lookupType((int) $this->request->getQueryParams()['ref_id'], true) == 'chac') {
             $this->getItems();
             return true;
         }
         
 
-        if (ilObject::_lookupType($_GET["ref_id"], true) != "recf") {
+        if (ilObject::_lookupType($this->request->getQueryParams()["ref_id"], true) != "recf") {
             if ($_SESSION["clipboard"]) {
                 if ($this->isEditable()) {
                     $this->addCommandButton("paste", $lng->txt("paste"));
@@ -203,7 +203,7 @@ class ilAdminSubItemsTableGUI extends ilTable2GUI
         $class = strtolower("ilObj" . $class_name . "GUI");
         $ilCtrl->setParameterByClass($class, "ref_id", $a_set["ref_id"]);
         $this->tpl->setVariable("HREF_TITLE", $ilCtrl->getLinkTargetByClass($class, "view"));
-        $ilCtrl->setParameterByClass($class, "ref_id", $_GET["ref_id"]);
+        $ilCtrl->setParameterByClass($class, "ref_id", $this->request->getQueryParams()["ref_id"]);
                     
         // TODO: broken! fix me
         $title = $a_set["title"];
