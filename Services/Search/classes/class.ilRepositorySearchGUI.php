@@ -925,7 +925,8 @@ class ilRepositorySearchGUI
 
                     // no break
                 case FIELD_TYPE_TEXT:
-                    $user_search = &ilObjectSearchFactory::_getUserSearchInstance($query_parser);
+                    $userSearchInstance = ilObjectSearchFactory::_getUserSearchInstance($query_parser);
+                    $user_search = &$userSearchInstance;
                     $user_search->setFields(array($name));
                     $result_obj = $user_search->performSearch();
 
