@@ -117,8 +117,8 @@ switch ($target_type) {
     // please migrate to default branch implementation
     case "frm":
         require_once("./Modules/Forum/classes/class.ilObjForumGUI.php");
-        $target_thread = $target_arr[2];
-        $target_posting = $target_arr[3];
+        $target_thread = $target_arr[2] ?? null;
+        $target_posting = $target_arr[3] ?? null;
         ilObjForumGUI::_goto($target_id, $target_thread, $target_posting);
         break;
         
