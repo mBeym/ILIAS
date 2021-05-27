@@ -28,8 +28,8 @@ class ilObjForumSearchResultTableGUI extends ilRepositoryObjectSearchResultTable
             $DIC->ctrl()->setParameterByClass('ilObjForumGUI', 'thr_pk', $result_set['item_id']);
             $row['link'] = $DIC->ctrl()->getLinkTargetByClass('ilObjForumGUI', 'viewThread');
 
-            $row['relevance'] = $result_set['relevance'];
-            $row['content'] = $result_set['content'];
+            $row['relevance'] = $result_set['relevance'] ?? null;
+            $row['content'] = $result_set['content'] ?? null;
 
             $rows[] = $row;
         }
