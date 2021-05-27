@@ -28,7 +28,8 @@ class ilImportExportFactory
             }
         } else {
             $comp = $objDefinition->getComponentForType($a_type);
-            $class = array_pop(explode("/", $comp));
+            $components = explode("/", $comp);
+            $class = array_pop($components);
             $class = "il" . $class . "Exporter";
 
             // page component plugin exporter classes are already included
