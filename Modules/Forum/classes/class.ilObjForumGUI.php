@@ -476,7 +476,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
                         $_POST['selected_cmd'],
                         $member_cmd
                     ) ? $cmd = $_POST['selected_cmd'] : $cmd = 'performThreadsAction';
-                } elseif (!$cmd && !$_POST['selected_cmd']) {
+                } elseif (!$cmd && !isset($this->httpRequest->getParsedBody()['selected_cmd'])) {
                     $cmd = 'showThreads';
                 }
 
