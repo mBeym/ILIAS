@@ -235,15 +235,15 @@ class ilObjectDataSet extends ilDataSet
         switch ($a_entity) {
             case "common":
                 return array(
-                    "transl" => array("ids" => $a_rec["ObjId"]),
-                    "service_settings" => array("ids" => $a_rec["ObjId"]),
-                    "tile" => array("ids" => $a_rec["ObjId"]),
-                    "icon" => array("ids" => $a_rec["ObjId"])
+                    "transl" => array("ids" => $a_rec["ObjId"] ?? null),
+                    "service_settings" => array("ids" => $a_rec["ObjId"] ?? null),
+                    "tile" => array("ids" => $a_rec["ObjId"] ?? null),
+                    "icon" => array("ids" => $a_rec["ObjId"] ?? null)
                 );
 
             case "transl":
                 return array(
-                    "transl_entry" => array("ids" => $a_rec["ObjId"])
+                    "transl_entry" => array("ids" => $a_rec["ObjId"] ?? null)
                 );
         }
 

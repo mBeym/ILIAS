@@ -372,7 +372,7 @@ abstract class ilDataSet
                 $this->ds_log->debug("...dependencies: " . print_r($deps, true));
                 if (is_array($deps)) {
                     foreach ($deps as $dp => $par) {
-                        $this->addRecordsXml($a_writer, $a_prefixes, $dp, $a_schema_version, $par["ids"], $par["field"]);
+                        $this->addRecordsXml($a_writer, $a_prefixes, $dp, $a_schema_version, $par["ids"], $par["field"] ?? null);
                     }
                 }
             }

@@ -1822,7 +1822,8 @@ class ilNewsItem
             $ilDB->quote($a_news_id, "integer");
         $set = $ilDB->query($query);
         $rec = $ilDB->fetchAssoc($set);
-        return $rec["mob_id"];
+
+        return $rec["mob_id"] ?? null;
     }
 
     /**
