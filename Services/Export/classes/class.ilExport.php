@@ -468,8 +468,18 @@ class ilExport
     {
         $success = true;
 
-        $this->log->debug("process exporter, comp: " . $a_comp . ", class: " . $a_class . ", entity: " . $a_entity .
-            ", target release " . $a_target_release . ", id: " . (is_array($a_id) ? $a_id[0] : $a_id));
+        $loggingString = "process exporter, comp: " . $a_comp . ", class: " . $a_class . ", entity: " . $a_entity .
+            ", target release " . $a_target_release . ", id: ";
+
+        if(is_array($a_id)) {
+            if(count($a_id) > 0) {
+                $this->log->debug($loggingString . $a_id[0]);
+            } else {
+                $this->log->debug($loggingString . "null");
+            }
+        } else {
+            $this->log->debug($loggingString . $a_id);
+        }
 
         if (!is_array($a_id)) {
             if ($a_id == "") {
