@@ -469,7 +469,7 @@ class ilExport
         $success = true;
 
         $this->log->debug("process exporter, comp: " . $a_comp . ", class: " . $a_class . ", entity: " . $a_entity .
-            ", target release " . $a_target_release . ", id: " . $a_id);
+            ", target release " . $a_target_release . ", id: " . (is_array($a_id) ? $a_id[0] : $a_id));
 
         if (!is_array($a_id)) {
             if ($a_id == "") {
