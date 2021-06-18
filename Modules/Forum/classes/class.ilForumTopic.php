@@ -265,7 +265,7 @@ class ilForumTopic
         
         $row = $res->fetchRow(ilDBConstants::FETCHMODE_OBJECT);
         
-        return $row->pos_fk ? $row->pos_fk : 0;
+        return $row ? $row->pos_fk : 0;
     }
     
     /**
