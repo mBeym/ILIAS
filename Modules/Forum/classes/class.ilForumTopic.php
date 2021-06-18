@@ -276,9 +276,10 @@ class ilForumTopic
     public function updateVisits()
     {
         $checkTime = time() - (60 * 60);
-        
-        if ($_SESSION['frm_visit_frm_threads_' . $this->id] < $checkTime) {
-            $_SESSION['frm_visit_frm_threads_' . $this->id] = time();
+
+        $arrKey = 'frm_visit_frm_threads_' . $this->id;
+        if ($_SESSION[$arrKey] ?? null < $checkTime) {
+            $_SESSION[$arrKey] = time();
         
             $this->db->manipulateF(
                 '

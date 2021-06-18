@@ -156,7 +156,7 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
         }
 
         $threadId = $this->httpRequest->getQueryParams()['thr_pk'] ?? 0;
-        if ((int) $threadId > 0 && !is_array($forumValues[(int) $threadId])) {
+        if ((int) $threadId > 0 && (!isset($forumValues[(int) $threadId]) || !is_array($forumValues[(int) $threadId]))) {
             $forumValues[(int) $threadId] = [];
             \ilSession::set('frm', $forumValues);
         }
