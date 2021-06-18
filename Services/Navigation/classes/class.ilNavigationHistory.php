@@ -77,7 +77,7 @@ class ilNavigationHistory
         $ilDB = $this->db;
 
         // never store?
-        if ($ilUser->prefs["store_last_visited"] == 2) {
+        if (isset($ilUser->prefs["store_last_visited"]) && $ilUser->prefs["store_last_visited"] == 2) {
             return;
         }
         
