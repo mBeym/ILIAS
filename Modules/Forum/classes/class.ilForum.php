@@ -847,7 +847,7 @@ class ilForum
         }
 
         // DELETE ATTACHMENTS ASSIGNED TO POST
-        $this->__deletePostFiles($del_id);
+        $this->deletePostFiles($del_id);
         
         $dead_pos = count($del_id);
         $dead_thr = 0;
@@ -1923,7 +1923,7 @@ class ilForum
         return $text;
     }
 
-    public function __deletePostFiles($a_ids)
+    private function deletePostFiles($a_ids)
     {
         if (!is_array($a_ids)) {
             return false;
