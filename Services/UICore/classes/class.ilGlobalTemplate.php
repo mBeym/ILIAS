@@ -9,13 +9,13 @@
  */
 class ilGlobalTemplate implements ilGlobalTemplateInterface
 {
-    protected $on_load_code = [];
-    protected $left_nav_content = "";
-    protected $left_content = "";
-    protected $right_content = "";
+    protected array $on_load_code = [];
+    protected string $left_nav_content = "";
+    protected string $left_content = "";
+    protected string $right_content = "";
     protected $enable_fileupload = null;
-    protected $icon_desc = "";
-    protected $icon_path = "";
+    protected string $icon_desc = "";
+    protected string $icon_path = "";
     protected $tree_flat_link = "";
     protected $page_form_action = "";
     protected $permanent_link = false;
