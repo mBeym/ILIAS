@@ -362,7 +362,7 @@ class ilObjForum extends ilObject
             array(
                 'access_last' => array('integer', time()),
                 'access_old' => array('integer', isset($data['access_old']) ? $data['access_old'] : 0),
-                'access_old_ts' => array('timestamp', $data['access_old_ts'])
+                'access_old_ts' => array('timestamp', $data['access_old_ts'] ?? null)
             )
         );
 
