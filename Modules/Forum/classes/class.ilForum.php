@@ -1821,9 +1821,9 @@ class ilForum
     public function updateVisits($ID)
     {
         $checkTime = time() - (60 * 60);
-            
-        if ($_SESSION["frm_visit_" . $this->dbTable . "_" . $ID] < $checkTime) {
-            $_SESSION["frm_visit_" . $this->dbTable . "_" . $ID] = time();
+        $arrKey = "frm_visit_" . $this->dbTable . "_" . $ID;
+        if (isset($_SESSION[$arrKey]) && $_SESSION[$arrKey] < $checkTime) {
+            $_SESSION[$arrKey] = time();
             $query = 'UPDATE ' . $this->dbTable . ' SET visits = visits + 1 WHERE ';
             
             $data_type = array();
