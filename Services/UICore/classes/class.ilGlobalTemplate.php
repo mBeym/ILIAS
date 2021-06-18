@@ -4,11 +4,18 @@
 
 /**
  * special template class to simplify handling of ITX/PEAR
- * @author	Stefan Kesseler <skesseler@databay.de>
+ * @author	Stefan Kesseler <skesseler@databay.de>f
  * @author	Sascha Hofmann <shofmann@databay.de>
  */
 class ilGlobalTemplate implements ilGlobalTemplateInterface
 {
+    protected $on_load_code = [];
+    protected $left_nav_content = "";
+    protected $left_content = "";
+    protected $right_content = "";
+    protected $enable_fileupload = null;
+    protected $icon_desc = "";
+    protected $icon_path = "";
     protected $tree_flat_link = "";
     protected $page_form_action = "";
     protected $permanent_link = false;
@@ -450,7 +457,7 @@ class ilGlobalTemplate implements ilGlobalTemplateInterface
     {
         $js = "";
         for ($i = 1; $i <= 3; $i++) {
-            if (is_array($this->on_load_code[$i])) {
+            if (isset($this->on_load_code[$i]) && is_array($this->on_load_code[$i])) {
                 foreach ($this->on_load_code[$i] as $code) {
                     $js .= $code . "\n";
                 }
@@ -521,7 +528,7 @@ class ilGlobalTemplate implements ilGlobalTemplateInterface
     public function fillOnLoadCode()
     {
         for ($i = 1; $i <= 3; $i++) {
-            if (is_array($this->on_load_code[$i])) {
+            if (isset($this->on_load_code[$i]) && is_array($this->on_load_code[$i])) {
                 $this->setCurrentBlock("on_load_code");
                 foreach ($this->on_load_code[$i] as $code) {
                     $this->setCurrentBlock("on_load_code_inner");
@@ -917,6 +924,7 @@ class ilGlobalTemplate implements ilGlobalTemplateInterface
 
         $lng = $DIC->language();
 
+        $header = false;
         $icon = false;
         if ($this->icon_path != "") {
             $icon = true;
