@@ -1648,9 +1648,9 @@ class ilObjForumGUI extends \ilObjectGUI implements \ilDesktopItemHandling
     private function handleCensorship($wasRevoked = false)
     {
         if (!$this->objCurrentTopic->isClosed() && $this->is_moderator) {
-            $message = $this->handleFormInput($_POST['formData']['cens_message']);
+            $message = $this->handleFormInput($_POST['formData']['cens_message'] ?? "");
             if ($message === '') {
-                $message = $this->handleFormInput($_POST['cens_message']);
+                $message = $this->handleFormInput($_POST['cens_message'] ?? "");
             }
             $this->ensureThreadBelongsToForum((int) $this->object->getId(), $this->objCurrentPost->getThread());
 
