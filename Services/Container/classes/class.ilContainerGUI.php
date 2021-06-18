@@ -1161,7 +1161,7 @@ class ilContainerGUI extends ilObjectGUI implements ilDesktopItemHandling
                 ||
                 (is_object($this->object) &&
                     ($this->object->getHiddenFilesFound())) ||
-                $_SESSION["clipboard"]
+                isset($_SESSION["clipboard"])
             )
         ) {
             if ($this->isActiveAdministrationPanel()) {
