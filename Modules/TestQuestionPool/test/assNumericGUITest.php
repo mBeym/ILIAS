@@ -54,6 +54,8 @@ class assNumericGUITest extends assBaseTestCase
         // Arrange
         require_once './Modules/TestQuestionPool/classes/class.assNumericGUI.php';
 
+        $this->addGlobal_ilDB();
+
         // Act
         $instance = new assNumericGUI();
 

@@ -26,6 +26,9 @@ class assKprimChoiceTest extends assBaseTestCase
 
     public function test_instantiateObject_shouldReturnInstance()
     {
+        $this->addGlobal_ilias();
+        $this->addGlobal_ilDB();
+
         $instance = new assKprimChoice();
         $this->assertInstanceOf('assKprimChoice', $instance);
     }

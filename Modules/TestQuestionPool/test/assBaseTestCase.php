@@ -6,6 +6,7 @@ use ILIAS\Filesystem\Filesystems;
 use ILIAS\FileUpload\FileUpload;
 use ILIAS\HTTP\Services;
 use ILIAS\UI\Implementation\Factory;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class assBaseTestCase
@@ -18,6 +19,9 @@ abstract class assBaseTestCase extends TestCase
     protected function setUp() : void
     {
         $GLOBALS['DIC'] = new \ILIAS\DI\Container();
+        $this->addGlobal_lng();
+        $this->addGlobal_ilCtrl();
+        $this->addGlobal_tpl();
 
         parent::setUp();
     }
@@ -97,9 +101,15 @@ abstract class assBaseTestCase extends TestCase
 
     protected function addGlobal_objDefinition() : void
     {
+        $objectDefinition_mock = $this->getMockBuilder(ilObjectDefinition::class)->disableOriginalConstructor()->getMock();
+        $objectDefinition_mock->expects($this->any())
+            ->method("getDevModeAll")
+            ->willReturn([]);
+
         $this->setGlobalVariable(
             "objDefinition",
-            $this->getMockBuilder(ilObjectDefinition::class)->disableOriginalConstructor()->getMock());
+            $objectDefinition_mock
+        );
     }
 
     protected function addGlobal_tree() : void
@@ -182,9 +192,10 @@ abstract class assBaseTestCase extends TestCase
 
     protected function addGlobal_ilPluginAdmin() : void
     {
+        $t = new ilPluginAdmin();
         $this->setGlobalVariable(
             "ilPluginAdmin",
-            $this->getMockBuilder(ilPluginAdmin::class)->disableOriginalConstructor()->getMock());
+            new ilPluginAdmin());
     }
 
     protected function addGlobal_ilTabs() : void
@@ -224,9 +235,22 @@ abstract class assBaseTestCase extends TestCase
 
     protected function addGlobal_http() : void
     {
+        $request_mock = $this
+            ->getMockBuilder(ServerRequestInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $http_mock = $this->getMockBuilder(Services::class)->disableOriginalConstructor()->getMock();
+        $http_mock
+            ->expects($this->any())
+            ->method("request")
+            ->willReturn($request_mock);
+
+
         $this->setGlobalVariable(
             "http",
-            $this->getMockBuilder(Services::class)->disableOriginalConstructor()->getMock());
+            $http_mock
+        );
     }
 
     protected function addGlobal_ilIliasIniFile() : void
