@@ -14,6 +14,9 @@ class assClozeTestGUITest extends assBaseTestCase
 
     protected function setUp() : void
     {
+        $this->addGlobal_tpl();
+        $this->addGlobal_ilDB();
+
         if (defined('ILIAS_PHPUNIT_CONTEXT')) {
             include_once("./Services/PHPUnit/classes/class.ilUnitUtil.php");
             ilUnitUtil::performInitialisation();

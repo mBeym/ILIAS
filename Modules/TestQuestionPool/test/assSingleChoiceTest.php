@@ -16,6 +16,10 @@ class assSingleChoiceTest extends assBaseTestCase
 
     protected function setUp() : void
     {
+        $this->addGlobal_ilias();
+        $this->addGlobal_tpl();
+        $this->addGlobal_ilDB();
+
         require_once './Modules/TestQuestionPool/classes/class.assSingleChoice.php';
         if (defined('ILIAS_PHPUNIT_CONTEXT')) {
             include_once("./Services/PHPUnit/classes/class.ilUnitUtil.php");

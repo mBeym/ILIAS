@@ -85,7 +85,10 @@ abstract class assQuestion
      */
     protected $ilias;
 
-    protected ilTemplate $tpl;
+    /**
+     * @var ilGlobalPageTemplate|ilTemplate|mixed
+     */
+    protected $tpl;
 
     protected ilLanguage $lng;
 
