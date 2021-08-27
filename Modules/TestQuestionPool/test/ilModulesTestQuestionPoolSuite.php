@@ -20,6 +20,10 @@ class ilModulesTestQuestionPoolSuite extends TestSuite
             define("ROOT_FOLDER_ID", 1);
         }
 
+        if (!defined('ANONYMOUS_USER_ID')) {
+            define('ANONYMOUS_USER_ID', 13);
+        }
+
         if(!defined("ILIAS_LOG_ENABLED")) {
             define("ILIAS_LOG_ENABLED", false);
         }
