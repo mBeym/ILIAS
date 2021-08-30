@@ -13,7 +13,6 @@ class ilImagemapPreviewTest extends assBaseTestCase
     {
         parent::setUp();
 
-        $this->markTestSkipped("Undefined variable used in constructor");
         $this->testObj = new ilImagemapPreview();
     }
 

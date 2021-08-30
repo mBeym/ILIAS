@@ -37,7 +37,6 @@ class ilImagemapPreview
         $lng = $DIC['lng'];
         $this->lng = &$lng;
         $this->imagemap_filename = $imagemap_filename;
-        $this->preview_filename = $preview_filename;
         if (!@is_file($this->preview_filename)) {
             $extension = ".jpg";
             if (preg_match("/.*\.(png|jpg|gif|jpeg)$/", $this->imagemap_filename, $matches)) {
