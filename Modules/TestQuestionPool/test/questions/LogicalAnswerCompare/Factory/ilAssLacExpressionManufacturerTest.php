@@ -13,8 +13,7 @@ class ilAssLacExpressionManufacturerTest extends assBaseTestCase
     {
         parent::setUp();
 
-        $this->markTestSkipped("_getInstance() can't be called for some reason");
-        //$this->testObj = new ilAssLacExpressionManufacturer::_getInstance();
+        $this->testObj = ilAssLacExpressionManufacturer::_getInstance();
     }
 
 	public function test_instantiateObject_shouldReturnInstance() : void

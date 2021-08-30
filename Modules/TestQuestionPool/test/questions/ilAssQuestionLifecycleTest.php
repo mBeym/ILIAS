@@ -8,13 +8,15 @@
 class ilAssQuestionLifecycleTest extends assBaseTestCase
 {
     private ilAssQuestionLifecycle $testObj;
-    
+
+    /**
+     * @throws ilTestQuestionPoolInvalidArgumentException
+     */
     protected function setUp() : void
     {
         parent::setUp();
 
-        $this->markTestSkipped("_getInstance() can't be called for some reason");
-        //$this->testObj = new ilAssQuestionLifecycle::getInstance();
+        $this->testObj = ilAssQuestionLifecycle::getInstance(ilAssQuestionLifecycle::DRAFT);
     }
 
 	public function test_instantiateObject_shouldReturnInstance() : void
