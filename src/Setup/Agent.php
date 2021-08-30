@@ -87,4 +87,12 @@ interface Agent
      * @throw InvalidArgumentException if there is no such objective.
      */
     public function getNamedObjective(string $name, Config $config = null) : Objective;
+
+    /**
+     * Gets all named objectives
+     * The keys of the returned array are the commands.
+     *
+     * @return array<string, ObjectiveCollection>
+     */
+    public function getNamedObjectives(?Config $config = null) : array;
 }

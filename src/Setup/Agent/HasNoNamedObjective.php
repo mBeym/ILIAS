@@ -19,4 +19,9 @@ trait HasNoNamedObjective
             "There is no named objective '$name'."
         );
     }
+
+    public function getNamedObjectives(?Config $config = null) : array
+    {
+        return [];
+    }
 }

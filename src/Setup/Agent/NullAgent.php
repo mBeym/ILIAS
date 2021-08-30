@@ -92,4 +92,9 @@ class NullAgent implements Agent
             self::class . " has no named objectives."
         );
     }
+
+    public function getNamedObjectives(?Config $config = null) : array
+    {
+        return [];
+    }
 }

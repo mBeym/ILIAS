@@ -6,6 +6,8 @@ use ILIAS\Setup;
 use ILIAS\Refinery;
 use ILIAS\Data;
 use ILIAS\UI;
+use ILIAS\Setup\ObjectiveCollection;
+use ILIAS\Setup\Config;
 
 /**
  * Contains common objectives for the setup. Do not make additions here, in
@@ -134,16 +136,30 @@ class ilSetupAgent implements Setup\Agent
 
     public function getNamedObjective(string $name, Setup\Config $config = null) : Setup\Objective
     {
-        if ($name == "registerNICKey") {
-            if (is_null($config)) {
-                throw new \RuntimeException(
-                    "Missing Config for objective '$name'."
-                );
-            }
-            return new ilNICKeyRegisteredObjective($config);
+        if ($name === "registerNICKey" && is_null($config)) {
+            throw new \RuntimeException(
+                "Missing Config for objective '$name'."
+            );
         }
+
+        $namedObjectives = $this->getNamedObjectives();
+        if (isset($namedObjectives[$name])) {
+            return $namedObjectives[$name];
+        }
+
         throw new \InvalidArgumentException(
             "There is no named objective '$name'"
         );
+    }
+
+    public function getNamedObjectives(?Config $config = null) : array
+    {
+        return [
+            "registerNICKey" => new ObjectiveCollection(
+                "Register NIC key",
+                false,
+                new ilNICKeyRegisteredObjective($config),
+            )
+        ];
     }
 }

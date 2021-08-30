@@ -240,4 +240,28 @@ class AgentCollection implements Agent
             );
         }
     }
+
+    /**
+     * @return Agent[]
+     */
+    public function getAgents() : array
+    {
+        return $this->agents;
+    }
+
+    /**
+     * Returns an array of all available objectives available in the collection
+     * @param Config|null $config
+     * @return array
+     */
+    public function getNamedObjectives(?Config $config = null) : array
+    {
+        $namedObjectives = [];
+
+        foreach ($this->agents as $agent) {
+            $namedObjectives = array_merge($namedObjectives, $agent->getNamedObjectives($config));
+        }
+
+        return $namedObjectives;
+    }
 }
