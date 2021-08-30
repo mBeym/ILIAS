@@ -19,7 +19,6 @@ class ilSolutionExplorerTest extends assBaseTestCase
         $this->addGlobal_ilias();
         $this->addGlobal_ilDB();
 
-        $this->markTestSkipped("Using undefined property");
         $this->testObj = new ilSolutionExplorer(
             "test",
             "test"

@@ -175,6 +175,8 @@ class ilExplorer
     
     public $use_standard_frame = false;
 
+    public ?array $filter = null;
+
     /**
     * Constructor
     * @access	public
@@ -1276,7 +1278,7 @@ class ilExplorer
     */
     public function addFilter($a_item)
     {
-        $ispresent = 0;
+        $is_present = 0;
 
         if (is_array($this->filter)) {
             //run through filter
