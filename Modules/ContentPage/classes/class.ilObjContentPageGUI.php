@@ -664,7 +664,7 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
             }
         }
 
-        $a_values["activation_online"] = !$this->object->getOfflineStatus();
+        $a_values["activation_online"] = !($object->getOfflineStatus() === null) && !$object->getOfflineStatus();
         $a_values["access_period"]["start"] = new ilDateTime($this->object->getActivationStart(), IL_CAL_UNIX);
         $a_values["access_period"]["end"] = new ilDateTime($this->object->getActivationEnd(), IL_CAL_UNIX);
         $a_values['activation_visibility'] = $this->object->isActivationVisibility();
