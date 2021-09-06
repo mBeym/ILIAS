@@ -119,8 +119,6 @@ class ilForumProperties
      */
     private $file_upload_allowed = 0;
 
-    private bool $activationOnline = false;
-
     /**
      * @var ilForumProperties[]
      */
@@ -190,8 +188,6 @@ class ilForumProperties
                     $this->lp_req_num_postings = (int) $row->lp_req_num_postings;
                 }
 
-                $this->setActivationOnline((bool) $row->activation_type);
-
                 $this->exists = true;
                 return true;
             }
@@ -259,7 +255,6 @@ class ilForumProperties
                     'thread_rating' => array('integer', $this->isIsThreadRatingEnabled()),
                     'file_upload_allowed' => array('integer', $this->file_upload_allowed),
                     'interested_events' => array('integer', $this->interested_events),
-                    "activation_type" => ["integer", $this->isActivationOnline()]
                 ),
                 array(
                     'obj_id' => array('integer', $this->obj_id)
@@ -618,16 +613,5 @@ class ilForumProperties
     public function setLpReqNumPostings(?int $lp_req_num_postings) : void
     {
         $this->lp_req_num_postings = $lp_req_num_postings;
-    }
-
-    public function isActivationOnline() : bool
-    {
-        return $this->activationOnline;
-    }
-
-    public function setActivationOnline(bool $activationOnline) : ilForumProperties
-    {
-        $this->activationOnline = $activationOnline;
-        return $this;
     }
 }
