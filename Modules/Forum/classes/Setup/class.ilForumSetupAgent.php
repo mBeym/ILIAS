@@ -4,7 +4,6 @@
 
 use ILIAS\Setup;
 use ILIAS\Refinery;
-use ILIAS\UI;
 
 class ilForumSetupAgent implements Setup\Agent
 {
@@ -42,7 +41,7 @@ class ilForumSetupAgent implements Setup\Agent
      */
     public function getUpdateObjective(Setup\Config $config = null) : Setup\Objective
     {
-        return new Setup\Objective\NullObjective();
+        return new ilDatabaseUpdateStepsExecutedObjective(new ilForumUpdateSteps());
     }
 
     /**
