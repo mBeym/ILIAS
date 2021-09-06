@@ -73,6 +73,17 @@ class ilObjForumListGUI extends ilObjectListGUI
 
         $props = array();
 
+        if (
+            !ilObjForumAccess::isActivated($this->obj_id) &&
+            ilObject::lookupOfflineStatus($this->obj_id)
+        ) {
+            $props[] = array(
+                "alert" => true,
+                "property" => $this->lng->txt("status"),
+                "value" => $this->lng->txt("offline")
+            );
+        }
+
         $properties = ilObjForumAccess::getStatisticsByRefId($this->ref_id);
         $num_posts_total = $properties['num_posts'];
         $num_unread_total = $properties['num_unread_posts'];
