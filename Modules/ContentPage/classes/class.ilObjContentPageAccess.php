@@ -28,6 +28,26 @@ class ilObjContentPageAccess extends ilObjectAccess implements ilContentPageObje
         return $commands;
     }
 
+    public static function isActivated(
+        int $a_obj_id,
+        bool &$a_visible_flag = null
+    ) : bool {
+        $ref_id = ilObject::_getAllReferences($a_obj_id);
+        $ref_id = array_pop($ref_id);
+
+        $a_visible_flag = true;
+
+        $item = ilObjectActivation::getItem($ref_id);
+        if ((int) $item['timing_type'] === ilObjectActivation::TIMINGS_ACTIVATION) {
+            $time = time();
+            if ($time < (int) $item['timing_start'] || $time > (int) $item['timing_end']) {
+                $a_visible_flag = $item['visible'];
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * @inheritdoc
      */

@@ -72,6 +72,18 @@ class ilObjContentPageListGUI extends ilObjectListGUI implements ilContentPageOb
     {
         $properties = [];
 
+        if (
+            !ilObjContentPageAccess::isActivated((int) $this->obj_id) &&
+            ilObject::lookupOfflineStatus($this->obj_id)
+        ) {
+            $properties[] = array(
+                "alert" => true,
+                "property" => $this->lng->txt("status"),
+                "value" => $this->lng->txt("offline")
+            );
+        }
+
+
         $settingsStorage = new StorageImpl($this->settings);
         if (!$settingsStorage->getSettings()->isReadingTimeEnabled()) {
             return $properties;

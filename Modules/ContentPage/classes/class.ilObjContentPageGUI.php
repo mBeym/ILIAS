@@ -664,10 +664,10 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
             }
         }
 
-        $a_values["activation_online"] = (bool) $this->object->getOfflineStatus();
+        $a_values["activation_online"] = !$this->object->getOfflineStatus();
         $a_values["access_period"]["start"] = new ilDateTime($this->object->getActivationStart(), IL_CAL_UNIX);
         $a_values["access_period"]["end"] = new ilDateTime($this->object->getActivationEnd(), IL_CAL_UNIX);
-        $a_values['activation_visibility'] = (bool) $this->object->isActivationVisibility();
+        $a_values['activation_visibility'] = $this->object->isActivationVisibility();
         $a_values[ilObjectServiceSettingsGUI::INFO_TAB_VISIBILITY] = $this->infoScreenEnabled;
     }
 
@@ -676,6 +676,31 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
      */
     protected function updateCustom(ilPropertyFormGUI $a_form)
     {
+        //Availability
+        $accessPeriod = $a_form->getInput('access_period');
+
+        $this->object->setOfflineStatus(!(bool) $a_form->getInput('activation_online'));
+        $this->object->setActivationStart((new DateTime($accessPeriod["start"]))->getTimestamp());
+        $this->object->setActivationEnd((new DateTime($accessPeriod["end"]))->getTimestamp());
+        $this->object->setActivationVisibility((bool) $a_form->getInput('activation_visibility'));
+        if ($this->ref_id) {
+            ilObjectActivation::getItem($this->ref_id);
+            $item = new ilObjectActivation;
+
+            if (!$this->object->getActivationStart() || !$this->object->getActivationEnd()) {
+                $item->setTimingType(ilObjectActivation::TIMINGS_DEACTIVATED);
+            } else {
+                $item->setTimingType(ilObjectActivation::TIMINGS_ACTIVATION);
+                $item->setTimingStart($this->object->getActivationStart());
+                $item->setTimingEnd($this->object->getActivationEnd());
+                $item->toggleVisible($this->object->isActivationVisibility());
+            }
+
+            $item->update($this->ref_id);
+        }
+
+        $this->object->update();
+
         ilObjectServiceSettingsGUI::updateServiceSettingsForm(
             $this->object->getId(),
             $a_form,
