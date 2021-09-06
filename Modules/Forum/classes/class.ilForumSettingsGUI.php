@@ -352,6 +352,8 @@ class ilForumSettingsGUI
             $item->update($this->ref_id);
         }
 
+        $object->update();
+
         $this->parent_obj->objProperties->update();
         $this->obj_service->commonSettings()->legacyForm($a_form, $this->parent_obj->object)->saveTileImage();
 
