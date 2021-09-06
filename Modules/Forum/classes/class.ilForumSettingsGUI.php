@@ -45,7 +45,10 @@ class ilForumSettingsGUI
         $this->parent_obj = $parent_obj;
         $this->ctrl = $DIC->ctrl();
         $this->tpl = $DIC->ui()->mainTemplate();
+
         $this->lng = $DIC->language();
+        $this->lng->loadLanguageModule('rep');
+
         $this->settings = $DIC->settings();
         $this->tabs = $DIC->tabs();
         $this->access = $DIC->access();
@@ -78,6 +81,27 @@ class ilForumSettingsGUI
         }
     }
 
+    private function addAvailabilitySection(ilPropertyFormGUI $form) : void
+    {
+        $section = new ilFormSectionHeaderGUI();
+        $section->setTitle($this->lng->txt('rep_activation_availability'));
+        $form->addItem($section);
+
+        $online = new ilCheckboxInputGUI($this->lng->txt('rep_activation_online'), 'activation_online');
+        $online->setChecked(!$this->parent_obj->object->getOfflineStatus());
+        $online->setInfo($this->lng->txt('frm_activation_online_info'));
+        $form->addItem($online);
+
+        $dur = new ilDateDurationInputGUI($this->lng->txt('rep_time_period'), "access_period");
+        $dur->setShowTime(true);
+        $form->addItem($dur);
+
+        $visible = new ilCheckboxInputGUI($this->lng->txt('rep_activation_limited_visibility'),
+            'activation_visibility');
+        $visible->setInfo($this->lng->txt('frm_activation_limited_visibility_info'));
+        $dur->addSubItem($visible);
+    }
+
     /**
      * @param ilPropertyFormGUI $a_form
      */
@@ -86,6 +110,8 @@ class ilForumSettingsGUI
         $this->settingsTabs();
         $this->tabs->activateSubTab("basic_settings");
         $a_form->setTitle($this->lng->txt('frm_settings_form_header'));
+
+        $this->addAvailabilitySection($a_form);
 
         $presentationHeader = new ilFormSectionHeaderGUI();
         $presentationHeader->setTitle($this->lng->txt('frm_settings_presentation_header'));
@@ -247,10 +273,27 @@ class ilForumSettingsGUI
         
         $a_values['default_view'] = $default_view;
         $a_values['file_upload_allowed'] = (bool) $this->parent_obj->objProperties->getFileUploadAllowed();
+
+        //Availability
+        $object = $this->parent_obj->object;
+        if ($this->ref_id) {
+            $activation = ilObjectActivation::getItem($this->ref_id);
+            if ((int) $activation["timing_type"] === ilObjectActivation::TIMINGS_ACTIVATION) {
+                $object->setActivationStart((int) $activation["timing_start"]);
+                $object->setActivationEnd((int) $activation["timing_end"]);
+                $object->setActivationVisibility((bool) $activation["visible"]);
+            }
+        }
+
+        $a_values["activation_online"] = $this->parent_obj->objProperties->isActivationOnline();
+        $a_values["access_period"]["start"] = new ilDateTime($object->getActivationStart(), IL_CAL_UNIX);
+        $a_values["access_period"]["end"] = new ilDateTime($object->getActivationEnd(), IL_CAL_UNIX);
+        $a_values['activation_visibility'] = $object->isActivationVisibility();
     }
 
     /**
      * @param ilPropertyFormGUI $a_form
+     * @throws Exception
      */
     public function updateCustomValues(ilPropertyFormGUI $a_form)
     {
@@ -281,11 +324,38 @@ class ilForumSettingsGUI
         $this->parent_obj->objProperties->setMarkModeratorPosts((int) $a_form->getInput('mark_mod_posts'));
         $this->parent_obj->objProperties->setThreadSorting((int) $a_form->getInput('thread_sorting'));
         $this->parent_obj->objProperties->setIsThreadRatingEnabled((bool) $a_form->getInput('thread_rating'));
+
         if (!ilForumProperties::isFileUploadGloballyAllowed()) {
             $this->parent_obj->objProperties->setFileUploadAllowed((bool) $a_form->getInput('file_upload_allowed'));
         }
+
+        //Availability
+        $object = $this->parent_obj->object;
+        $accessPeriod = $a_form->getInput('access_period');
+
+        $this->parent_obj->objProperties->setActivationOnline((bool) $a_form->getInput('activation_online'));
+        $object->setActivationStart((new DateTime($accessPeriod["start"]))->getTimestamp());
+        $object->setActivationEnd((new DateTime($accessPeriod["end"]))->getTimestamp());
+        $object->setActivationVisibility((bool) $a_form->getInput('activation_visibility'));
+        if ($this->ref_id) {
+            ilObjectActivation::getItem($this->ref_id);
+            $item = new ilObjectActivation;
+
+            if (!$object->getActivationStart() || !$object->getActivationEnd()) {
+                $item->setTimingType(ilObjectActivation::TIMINGS_DEACTIVATED);
+            } else {
+                $item->setTimingType(ilObjectActivation::TIMINGS_ACTIVATION);
+                $item->setTimingStart($object->getActivationStart());
+                $item->setTimingEnd($object->getActivationEnd());
+                $item->toggleVisible($object->isActivationVisibility());
+            }
+
+            $item->update($this->ref_id);
+        }
+
         $this->parent_obj->objProperties->update();
         $this->obj_service->commonSettings()->legacyForm($a_form, $this->parent_obj->object)->saveTileImage();
+
     }
 
     public function showMembers()
