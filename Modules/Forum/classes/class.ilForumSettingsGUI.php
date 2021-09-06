@@ -88,7 +88,6 @@ class ilForumSettingsGUI
         $form->addItem($section);
 
         $online = new ilCheckboxInputGUI($this->lng->txt('rep_activation_online'), 'activation_online');
-        $online->setChecked(!$this->parent_obj->object->getOfflineStatus());
         $online->setInfo($this->lng->txt('frm_activation_online_info'));
         $form->addItem($online);
 
@@ -285,7 +284,7 @@ class ilForumSettingsGUI
             }
         }
 
-        $a_values["activation_online"] = $this->parent_obj->objProperties->isActivationOnline();
+        $a_values["activation_online"] = !$object->getOfflineStatus();
         $a_values["access_period"]["start"] = new ilDateTime($object->getActivationStart(), IL_CAL_UNIX);
         $a_values["access_period"]["end"] = new ilDateTime($object->getActivationEnd(), IL_CAL_UNIX);
         $a_values['activation_visibility'] = $object->isActivationVisibility();
@@ -333,7 +332,7 @@ class ilForumSettingsGUI
         $object = $this->parent_obj->object;
         $accessPeriod = $a_form->getInput('access_period');
 
-        $this->parent_obj->objProperties->setActivationOnline((bool) $a_form->getInput('activation_online'));
+        $object->setOfflineStatus(!(bool) $a_form->getInput('activation_online'));
         $object->setActivationStart((new DateTime($accessPeriod["start"]))->getTimestamp());
         $object->setActivationEnd((new DateTime($accessPeriod["end"]))->getTimestamp());
         $object->setActivationVisibility((bool) $a_form->getInput('activation_visibility'));
