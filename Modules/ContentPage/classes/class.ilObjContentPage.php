@@ -174,6 +174,9 @@ class ilObjContentPage extends ilObject2 implements ilContentPageObjectConstants
             ['integer', 'integer'],
             [$this->getId(), 0]
         );
+
+        $this->setOfflineStatus(true);
+        $this->update();
     }
 
 
