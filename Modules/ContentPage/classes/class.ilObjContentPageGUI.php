@@ -619,10 +619,33 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
             ]
         );
 
+        $this->addAvailabilitySection($a_form);
+
         $presentationHeader = new ilFormSectionHeaderGUI();
         $presentationHeader->setTitle($this->lng->txt('settings_presentation_header'));
         $a_form->addItem($presentationHeader);
+
         $this->obj_service->commonSettings()->legacyForm($a_form, $this->object)->addTileImage();
+    }
+
+    private function addAvailabilitySection(ilPropertyFormGUI $form) : void
+    {
+        $section = new ilFormSectionHeaderGUI();
+        $section->setTitle($this->lng->txt('rep_activation_availability'));
+        $form->addItem($section);
+
+        $online = new ilCheckboxInputGUI($this->lng->txt('rep_activation_online'), 'activation_online');
+        $online->setInfo($this->lng->txt('copa_activation_online_info'));
+        $form->addItem($online);
+
+        $dur = new ilDateDurationInputGUI($this->lng->txt('rep_time_period'), "access_period");
+        $dur->setShowTime(true);
+        $form->addItem($dur);
+
+        $visible = new ilCheckboxInputGUI($this->lng->txt('rep_activation_limited_visibility'),
+            'activation_visibility');
+        $visible->setInfo($this->lng->txt('copa_activation_limited_visibility_info'));
+        $dur->addSubItem($visible);
     }
 
     /**
