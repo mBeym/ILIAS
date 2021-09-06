@@ -4,6 +4,7 @@
 
 use ILIAS\Setup;
 use ILIAS\Refinery;
+use ILIAS\UI;
 
 class ilForumSetupAgent implements Setup\Agent
 {
