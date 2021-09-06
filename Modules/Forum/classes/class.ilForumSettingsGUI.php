@@ -284,7 +284,7 @@ class ilForumSettingsGUI
             }
         }
 
-        $a_values["activation_online"] = !$object->getOfflineStatus();
+        $a_values["activation_online"] = !($object->getOfflineStatus() === null) && !$object->getOfflineStatus();
         $a_values["access_period"]["start"] = new ilDateTime($object->getActivationStart(), IL_CAL_UNIX);
         $a_values["access_period"]["end"] = new ilDateTime($object->getActivationEnd(), IL_CAL_UNIX);
         $a_values['activation_visibility'] = $object->isActivationVisibility();
