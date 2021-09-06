@@ -14,6 +14,10 @@ class ilObjContentPage extends ilObject2 implements ilContentPageObjectConstants
     protected ?ilObjectTranslation $objTrans = null;
     private PageMetricsService $pageMetricsService;
 
+    private int $activationStart = 0;
+    private int $activationEnd = 0;
+    private bool $activationVisibility = false;
+
     /**
      * @inheritDoc
      */
@@ -256,5 +260,38 @@ class ilObjContentPage extends ilObject2 implements ilContentPageObjectConstants
             $this->getId(),
             $usrId
         );
+    }
+
+    public function getActivationStart() : int
+    {
+        return $this->activationStart;
+    }
+
+    public function setActivationStart(int $activationStart) : ilObjContentPage
+    {
+        $this->activationStart = $activationStart;
+        return $this;
+    }
+
+    public function getActivationEnd() : int
+    {
+        return $this->activationEnd;
+    }
+
+    public function setActivationEnd(int $activationEnd) : ilObjContentPage
+    {
+        $this->activationEnd = $activationEnd;
+        return $this;
+    }
+
+    public function isActivationVisibility() : bool
+    {
+        return $this->activationVisibility;
+    }
+
+    public function setActivationVisibility(bool $activationVisibility) : ilObjContentPage
+    {
+        $this->activationVisibility = $activationVisibility;
+        return $this;
     }
 }

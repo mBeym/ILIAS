@@ -69,6 +69,7 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
         $this->lng->loadLanguageModule('copa');
         $this->lng->loadLanguageModule('style');
         $this->lng->loadLanguageModule('content');
+        $this->lng->loadLanguageModule('rep');
 
         if ($this->object instanceof ilObjContentPage) {
             $this->infoScreenEnabled = (bool) ilContainer::_lookupContainerSetting(
@@ -653,6 +654,20 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
      */
     protected function getEditFormCustomValues(array &$a_values)
     {
+        //Availability
+        if ($this->ref_id) {
+            $activation = ilObjectActivation::getItem($this->ref_id);
+            if ((int) $activation["timing_type"] === ilObjectActivation::TIMINGS_ACTIVATION) {
+                $this->object->setActivationStart((int) $activation["timing_start"]);
+                $this->object->setActivationEnd((int) $activation["timing_end"]);
+                $this->object->setActivationVisibility((bool) $activation["visible"]);
+            }
+        }
+
+        $a_values["activation_online"] = (bool) $this->object->getOfflineStatus();
+        $a_values["access_period"]["start"] = new ilDateTime($this->object->getActivationStart(), IL_CAL_UNIX);
+        $a_values["access_period"]["end"] = new ilDateTime($this->object->getActivationEnd(), IL_CAL_UNIX);
+        $a_values['activation_visibility'] = (bool) $this->object->isActivationVisibility();
         $a_values[ilObjectServiceSettingsGUI::INFO_TAB_VISIBILITY] = $this->infoScreenEnabled;
     }
 
