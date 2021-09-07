@@ -90,15 +90,6 @@ class ilForumSettingsGUI
         $online = new ilCheckboxInputGUI($this->lng->txt('rep_activation_online'), 'activation_online');
         $online->setInfo($this->lng->txt('frm_activation_online_info'));
         $form->addItem($online);
-
-        $dur = new ilDateDurationInputGUI($this->lng->txt('rep_time_period'), "access_period");
-        $dur->setShowTime(true);
-        $form->addItem($dur);
-
-        $visible = new ilCheckboxInputGUI($this->lng->txt('rep_activation_limited_visibility'),
-            'activation_visibility');
-        $visible->setInfo($this->lng->txt('frm_activation_limited_visibility_info'));
-        $dur->addSubItem($visible);
     }
 
     /**
@@ -275,19 +266,8 @@ class ilForumSettingsGUI
 
         //Availability
         $object = $this->parent_obj->object;
-        if ($this->ref_id) {
-            $activation = ilObjectActivation::getItem($this->ref_id);
-            if ((int) $activation["timing_type"] === ilObjectActivation::TIMINGS_ACTIVATION) {
-                $object->setActivationStart((int) $activation["timing_start"]);
-                $object->setActivationEnd((int) $activation["timing_end"]);
-                $object->setActivationVisibility((bool) $activation["visible"]);
-            }
-        }
 
         $a_values["activation_online"] = !($object->getOfflineStatus() === null) && !$object->getOfflineStatus();
-        $a_values["access_period"]["start"] = new ilDateTime($object->getActivationStart(), IL_CAL_UNIX);
-        $a_values["access_period"]["end"] = new ilDateTime($object->getActivationEnd(), IL_CAL_UNIX);
-        $a_values['activation_visibility'] = $object->isActivationVisibility();
     }
 
     /**
@@ -330,41 +310,7 @@ class ilForumSettingsGUI
 
         //Availability
         $object = $this->parent_obj->object;
-        /**
-         * @var ilDateDurationInputGUI $accessPeriodInput
-         */
-        $accessPeriodInput = $a_form->getItemByPostVar('access_period');
-
         $object->setOfflineStatus(!(bool) $a_form->getInput('activation_online'));
-
-        $start = $accessPeriodInput->getStart();
-        if($start) {
-            $start = $start->get(IL_CAL_UNIX);
-        }
-        $end = $accessPeriodInput->getEnd();
-        if($end) {
-            $end = $end->get(IL_CAL_UNIX);
-        }
-
-        $object->setActivationStart($start ?? 0);
-        $object->setActivationEnd($end ?? 0);
-        $object->setActivationVisibility((bool) $a_form->getInput('activation_visibility'));
-        if ($this->ref_id) {
-            ilObjectActivation::getItem($this->ref_id);
-            $item = new ilObjectActivation;
-
-            if (!$object->getActivationStart() || !$object->getActivationEnd()) {
-                $item->setTimingType(ilObjectActivation::TIMINGS_DEACTIVATED);
-            } else {
-                $item->setTimingType(ilObjectActivation::TIMINGS_ACTIVATION);
-                $item->setTimingStart($object->getActivationStart());
-                $item->setTimingEnd($object->getActivationEnd());
-                $item->toggleVisible($object->isActivationVisibility());
-            }
-
-            $item->update($this->ref_id);
-        }
-
         $object->update();
 
         $this->parent_obj->objProperties->update();

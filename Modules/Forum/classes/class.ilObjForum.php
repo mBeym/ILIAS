@@ -51,10 +51,6 @@ class ilObjForum extends ilObject
     private $user;
     private $logger;
 
-    private int $activationStart = 0;
-    private int $activationEnd = 0;
-    private bool $activationVisibility = false;
-
     /**
      * Constructor
      * @access    public
@@ -1204,38 +1200,5 @@ class ilObjForum extends ilObject
             array('thread_id' => array('integer', $merge_target_thread_id)),
             array('thread_id' => array('integer',$merge_source_thread_id))
         );
-    }
-
-    public function getActivationStart() : int
-    {
-        return $this->activationStart;
-    }
-
-    public function setActivationStart(int $activationStart) : ilObjForum
-    {
-        $this->activationStart = $activationStart;
-        return $this;
-    }
-
-    public function getActivationEnd() : int
-    {
-        return $this->activationEnd;
-    }
-
-    public function setActivationEnd(int $activationEnd) : ilObjForum
-    {
-        $this->activationEnd = $activationEnd;
-        return $this;
-    }
-
-    public function isActivationVisibility() : bool
-    {
-        return $this->activationVisibility;
-    }
-
-    public function setActivationVisibility(bool $activationVisibility) : ilObjForum
-    {
-        $this->activationVisibility = $activationVisibility;
-        return $this;
     }
 }
