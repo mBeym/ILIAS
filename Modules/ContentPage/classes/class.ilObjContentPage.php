@@ -138,6 +138,17 @@ class ilObjContentPage extends ilObject2 implements ilContentPageObjectConstants
 
         $lpSettings = new ilLPObjSettings($this->getId());
         $lpSettings->cloneSettings($new_obj->getId());
+
+        $cwo = ilCopyWizardOptions::_getInstance($a_copy_id);
+        $options = $cwo->getOptions($this->getRefId());
+
+        //copy online status if object is not the root copy object
+        if (!$cwo->isRootNode($this->getRefId())) {
+            $new_obj->setOfflineStatus($this->getOfflineStatus());
+        } else {
+            $new_obj->setOfflineStatus(true);
+        }
+        $new_obj->update();
     }
 
     /**
