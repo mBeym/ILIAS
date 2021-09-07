@@ -677,11 +677,23 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
     protected function updateCustom(ilPropertyFormGUI $a_form)
     {
         //Availability
-        $accessPeriod = $a_form->getInput('access_period');
+        /**
+         * @var ilDateDurationInputGUI $accessPeriodInput
+         */
+        $accessPeriodInput = $a_form->getItemByPostVar('access_period');
 
+        $start = $accessPeriodInput->getStart();
+        if($start) {
+            $start = $start->get(IL_CAL_UNIX);
+        }
+        $end = $accessPeriodInput->getEnd();
+        if($end) {
+            $end = $end->get(IL_CAL_UNIX);
+        }
+
+        $this->object->setActivationStart($start ?? 0);
+        $this->object->setActivationEnd($end ?? 0);
         $this->object->setOfflineStatus(!(bool) $a_form->getInput('activation_online'));
-        $this->object->setActivationStart((new DateTime($accessPeriod["start"]))->getTimestamp());
-        $this->object->setActivationEnd((new DateTime($accessPeriod["end"]))->getTimestamp());
         $this->object->setActivationVisibility((bool) $a_form->getInput('activation_visibility'));
         if ($this->ref_id) {
             ilObjectActivation::getItem($this->ref_id);
