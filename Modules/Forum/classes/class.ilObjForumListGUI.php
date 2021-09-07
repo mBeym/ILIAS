@@ -23,6 +23,8 @@ class ilObjForumListGUI extends ilObjectListGUI
         
         global $DIC;
         $this->lng = $DIC->language();
+        $this->lng->loadLanguageModule('forum');
+
         $this->user = $DIC->user();
         $this->access = $DIC->access();
         $this->settings = $DIC->settings();
@@ -65,24 +67,13 @@ class ilObjForumListGUI extends ilObjectListGUI
      */
     public function getProperties()
     {
-        if (!$this->access->checkAccess('read', '', $this->ref_id)) {
-            return array();
+        $props = [];
+
+        if (!$this->rbacsystem->checkAccess("visible,read", $this->ref_id)) {
+            return $props;
         }
 
-        $this->lng->loadLanguageModule('forum');
-
-        $props = array();
-
-        if (
-            !ilObjForumAccess::isActivated($this->obj_id) &&
-            ilObject::lookupOfflineStatus($this->obj_id)
-        ) {
-            $props[] = array(
-                "alert" => true,
-                "property" => $this->lng->txt("status"),
-                "value" => $this->lng->txt("offline")
-            );
-        }
+        $props = parent::getProperties();
 
         $properties = ilObjForumAccess::getStatisticsByRefId($this->ref_id);
         $num_posts_total = $properties['num_posts'];

@@ -330,11 +330,24 @@ class ilForumSettingsGUI
 
         //Availability
         $object = $this->parent_obj->object;
-        $accessPeriod = $a_form->getInput('access_period');
+        /**
+         * @var ilDateDurationInputGUI $accessPeriodInput
+         */
+        $accessPeriodInput = $a_form->getItemByPostVar('access_period');
 
         $object->setOfflineStatus(!(bool) $a_form->getInput('activation_online'));
-        $object->setActivationStart((new DateTime($accessPeriod["start"]))->getTimestamp());
-        $object->setActivationEnd((new DateTime($accessPeriod["end"]))->getTimestamp());
+
+        $start = $accessPeriodInput->getStart();
+        if($start) {
+            $start = $start->get(IL_CAL_UNIX);
+        }
+        $end = $accessPeriodInput->getEnd();
+        if($end) {
+            $end = $end->get(IL_CAL_UNIX);
+        }
+
+        $object->setActivationStart($start ?? 0);
+        $object->setActivationEnd($end ?? 0);
         $object->setActivationVisibility((bool) $a_form->getInput('activation_visibility'));
         if ($this->ref_id) {
             ilObjectActivation::getItem($this->ref_id);
