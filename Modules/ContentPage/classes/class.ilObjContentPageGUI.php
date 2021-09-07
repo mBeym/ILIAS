@@ -638,15 +638,6 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
         $online = new ilCheckboxInputGUI($this->lng->txt('rep_activation_online'), 'activation_online');
         $online->setInfo($this->lng->txt('copa_activation_online_info'));
         $form->addItem($online);
-
-        $dur = new ilDateDurationInputGUI($this->lng->txt('rep_time_period'), "access_period");
-        $dur->setShowTime(true);
-        $form->addItem($dur);
-
-        $visible = new ilCheckboxInputGUI($this->lng->txt('rep_activation_limited_visibility'),
-            'activation_visibility');
-        $visible->setInfo($this->lng->txt('copa_activation_limited_visibility_info'));
-        $dur->addSubItem($visible);
     }
 
     /**
@@ -654,20 +645,7 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
      */
     protected function getEditFormCustomValues(array &$a_values)
     {
-        //Availability
-        if ($this->ref_id) {
-            $activation = ilObjectActivation::getItem($this->ref_id);
-            if ((int) $activation["timing_type"] === ilObjectActivation::TIMINGS_ACTIVATION) {
-                $this->object->setActivationStart((int) $activation["timing_start"]);
-                $this->object->setActivationEnd((int) $activation["timing_end"]);
-                $this->object->setActivationVisibility((bool) $activation["visible"]);
-            }
-        }
-
         $a_values["activation_online"] = !($this->object->getOfflineStatus() === null) && !$this->object->getOfflineStatus();
-        $a_values["access_period"]["start"] = new ilDateTime($this->object->getActivationStart(), IL_CAL_UNIX);
-        $a_values["access_period"]["end"] = new ilDateTime($this->object->getActivationEnd(), IL_CAL_UNIX);
-        $a_values['activation_visibility'] = $this->object->isActivationVisibility();
         $a_values[ilObjectServiceSettingsGUI::INFO_TAB_VISIBILITY] = $this->infoScreenEnabled;
     }
 
@@ -677,40 +655,7 @@ class ilObjContentPageGUI extends ilObject2GUI implements ilContentPageObjectCon
     protected function updateCustom(ilPropertyFormGUI $a_form)
     {
         //Availability
-        /**
-         * @var ilDateDurationInputGUI $accessPeriodInput
-         */
-        $accessPeriodInput = $a_form->getItemByPostVar('access_period');
-
-        $start = $accessPeriodInput->getStart();
-        if($start) {
-            $start = $start->get(IL_CAL_UNIX);
-        }
-        $end = $accessPeriodInput->getEnd();
-        if($end) {
-            $end = $end->get(IL_CAL_UNIX);
-        }
-
-        $this->object->setActivationStart($start ?? 0);
-        $this->object->setActivationEnd($end ?? 0);
         $this->object->setOfflineStatus(!(bool) $a_form->getInput('activation_online'));
-        $this->object->setActivationVisibility((bool) $a_form->getInput('activation_visibility'));
-        if ($this->ref_id) {
-            ilObjectActivation::getItem($this->ref_id);
-            $item = new ilObjectActivation;
-
-            if (!$this->object->getActivationStart() || !$this->object->getActivationEnd()) {
-                $item->setTimingType(ilObjectActivation::TIMINGS_DEACTIVATED);
-            } else {
-                $item->setTimingType(ilObjectActivation::TIMINGS_ACTIVATION);
-                $item->setTimingStart($this->object->getActivationStart());
-                $item->setTimingEnd($this->object->getActivationEnd());
-                $item->toggleVisible($this->object->isActivationVisibility());
-            }
-
-            $item->update($this->ref_id);
-        }
-
         $this->object->update();
 
         ilObjectServiceSettingsGUI::updateServiceSettingsForm(
