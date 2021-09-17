@@ -365,4 +365,27 @@ class AgentCollectionTest extends TestCase
         $res = $c->getNamedObjective("sub.c2.the_objective", $conf);
         $this->assertSame($o, $res);
     }
+
+    public function testGetNamedObjectives() : void
+    {
+        $agent = $this->newAgent();
+        $objective1 = $this->newObjective();
+        $objective2 = $this->newObjective();
+        $config = new Setup\NullConfig();
+
+        $expected = [
+            "objective-1" => new Setup\ObjectiveCollection("ABC", false, $objective1),
+            "objective-2" => new Setup\ObjectiveCollection("XYZ", false, $objective2)
+        ];
+
+        $agent
+            ->expects($this->once())
+            ->method("getNamedObjectives")
+            ->with($config)
+            ->willReturn($expected);
+
+        $result = $agent->getNamedObjectives($config);
+
+        $this->assertSame($expected, $result);
+    }
 }
