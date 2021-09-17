@@ -17,6 +17,7 @@ use ILIAS\Setup\AgentFinder;
 use ILIAS\Setup\NoConfirmationException;
 use ILIAS\Refinery\Factory as Refinery;
 use ILIAS\Setup\NullConfig;
+use InvalidArgumentException;
 
 /**
  * Achieves an objective
@@ -116,10 +117,18 @@ class AchieveCommand extends Command
         if ($input->getArgument("config")) {
             $config = $this->readAgentConfig($agent, $input);
         } else {
-            $config = new NullConfig();
+            $config = null;
         }
 
-        $objective = $agent->getNamedObjective($objective_name, $config);
+        $namedObjectives = $agent->getNamedObjectives(new NullConfig());
+
+        if (isset($namedObjectives[$objective_name])) {
+            $objective = $namedObjectives[$objective_name];
+        } else {
+            throw new InvalidArgumentException(
+                "There is no named objective '$objective_name'"
+            );
+        }
 
         if (count($this->preconditions) > 0) {
             $objective = new ObjectiveWithPreconditions(
