@@ -113,11 +113,16 @@ class AchieveCommandTest extends TestCase
                 return $config;
             }));
 
+        $namedObjectives = [
+            "my.objective" => new Setup\ObjectiveCollection(
+                "My Objective", false, $objective
+            ),
+        ];
+
         $agent
             ->expects($this->once())
-            ->method("getNamedObjective")
-            ->with($objective_name, $config)
-            ->willReturn($objective);
+            ->method("getNamedObjectives")
+            ->willReturn($namedObjectives);
 
         $objective
             ->expects($this->once())
