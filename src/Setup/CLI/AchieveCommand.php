@@ -116,7 +116,7 @@ class AchieveCommand extends Command
         if ($input->getArgument("config")) {
             $config = $this->readAgentConfig($agent, $input);
         } else {
-            $config = null;
+            $config = new NullConfig();
         }
 
         $objective = $agent->getNamedObjective($objective_name, $config);
