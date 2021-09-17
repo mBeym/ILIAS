@@ -12,6 +12,10 @@ use ILIAS\Data\Factory as DataFactory;
 use Symfony\Component\Console\Input\InputInterface;
 use ILIAS\Setup\Config;
 use ILIAS\Setup\Agent;
+use Symfony\Component\Console\Output\StreamOutput;
+use ilUICoreSetupAgent;
+use ilLanguage;
+use ilSetupAgent;
 
 class TestConfig implements Config
 {
@@ -133,5 +137,48 @@ class AchieveCommandTest extends TestCase
             "config" => $config_file,
             "objective" => $objective_name
         ]);
+    }
+
+    public function testListNamedObjectives() : void
+    {
+        $refinery = new Refinery(
+            $this->createMock(DataFactory::class),
+            $this->createMock(ilLanguage::class)
+        );
+        $config_reader = $this->createMock(Setup\CLI\ConfigReader::class);
+
+        $setupAgents = [
+            "uicore" => new ilUICoreSetupAgent(),
+            "common" => new ilSetupAgent($refinery, $this->createMock(DataFactory::class))
+        ];
+
+        $agent_finder = $this->createMock(Setup\AgentFinder::class);
+        $agent_finder
+            ->expects($this->any())
+            ->method("getAgents")
+            ->willReturn(new Setup\AgentCollection($refinery, $setupAgents));
+
+        $command = new Setup\CLI\AchieveCommand($agent_finder, $config_reader, [], $refinery);
+
+        $input_mock = $this->createMock(InputInterface::class);
+        $input_mock
+            ->expects($this->any())
+            ->method("getOption")
+            ->willReturn(true);
+
+        $output = new StreamOutput(fopen('php://memory', 'wb', false));
+
+        $command->execute($input_mock, $output);
+        rewind($output->getStream());
+
+        $outputData = stream_get_contents($output->getStream());
+
+        foreach ($setupAgents as $agentKey => $setupAgent) {
+            $namedObjectives = $setupAgent->getNamedObjectives(new Setup\NullConfig());
+            foreach ($namedObjectives as $name => $objectiveCollection) {
+                $this->assertStringContainsString("$agentKey.$name", $outputData);
+                $this->assertStringContainsString($objectiveCollection->getLabel(), $outputData);
+            }
+        }
     }
 }
