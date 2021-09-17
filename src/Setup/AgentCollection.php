@@ -249,17 +249,20 @@ class AgentCollection implements Agent
         return $this->agents;
     }
 
-    /**
-     * Returns an array of all available objectives available in the collection
-     * @param Config|null $config
-     * @return array
-     */
+    /** @inheritDoc */
     public function getNamedObjectives(?Config $config = null) : array
     {
+        $agents = $this->agents;
+        ksort($agents);
         $namedObjectives = [];
 
-        foreach ($this->agents as $agent) {
-            $namedObjectives = array_merge($namedObjectives, $agent->getNamedObjectives($config));
+        foreach ($agents as $agentKey => $agent) {
+            $objectives = $agent->getNamedObjectives($config);
+            ksort($objectives);
+
+            foreach ($objectives as $name => $objectiveCollection) {
+                $namedObjectives["$agentKey.$name"] = $objectiveCollection;
+            }
         }
 
         return $namedObjectives;

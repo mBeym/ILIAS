@@ -16,7 +16,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use ILIAS\Setup\AgentFinder;
 use ILIAS\Setup\NoConfirmationException;
 use ILIAS\Refinery\Factory as Refinery;
-use ILIAS\Setup\AgentCollection;
 use ILIAS\Setup\NullConfig;
 
 /**
@@ -101,20 +100,9 @@ class AchieveCommand extends Command
         $agentCollection = $this->agent_finder->getAgents();
         $config = new NullConfig();
 
-        $agents = $agentCollection->getAgents();
-        ksort($agents);
-
-        foreach ($agents as $agentName => $agent) {
-            $namedObjectives = $agent->getNamedObjectives($config);
-            ksort($namedObjectives);
-
-            if (count($namedObjectives) > 0) {
-                foreach ($namedObjectives as $cmd => $namedObjective) {
-                    $output->write(str_pad("$agentName.$cmd", IOWrapper::LABEL_WIDTH));
-                    $output->writeln($namedObjective->getLabel());
-                }
-                $output->write("\n");
-            }
+        foreach ($agentCollection->getNamedObjectives($config) as $cmd => $objectiveCollection) {
+            $output->write(str_pad($cmd, IOWrapper::LABEL_WIDTH));
+            $output->writeln($objectiveCollection->getLabel() . "\n");
         }
     }
 
