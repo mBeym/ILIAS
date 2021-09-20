@@ -103,7 +103,7 @@ class AchieveCommand extends Command
 
         foreach ($agentCollection->getNamedObjectives($config) as $cmd => $objectiveCollection) {
             $output->write(str_pad($cmd, IOWrapper::LABEL_WIDTH));
-            $output->writeln($objectiveCollection->getLabel() . "\n");
+            $output->writeln($objectiveCollection->getDescription() . "\n");
         }
     }
 
@@ -132,7 +132,7 @@ class AchieveCommand extends Command
 
         if (count($this->preconditions) > 0) {
             $objective = new ObjectiveWithPreconditions(
-                $objective,
+                $objective->getObjectiveCollectionClosure()(),
                 ...$this->preconditions
             );
         }

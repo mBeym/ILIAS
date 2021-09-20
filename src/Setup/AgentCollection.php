@@ -257,7 +257,11 @@ class AgentCollection implements Agent
         $namedObjectives = [];
 
         foreach ($agents as $agentKey => $agent) {
-            $objectives = $agent->getNamedObjectives($config);
+            $objectives = [];
+            foreach ($agent->getNamedObjectives($config) as $namedObjective) {
+                $objectives[$namedObjective->getCmd()] = $namedObjective;
+            }
+
             ksort($objectives);
 
             foreach ($objectives as $name => $objectiveCollection) {

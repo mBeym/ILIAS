@@ -92,8 +92,10 @@ interface Agent
      * Gets all named objectives
      * The keys of the returned array are the commands.
      *
+     * Only the AgentCollection should return an array where the cmd of the named objective is the array key.
+     *
      * @param Config|null $config
-     * @return array<string, ObjectiveCollection>
+     * @return array<string|int, NamedObjective>
      */
     public function getNamedObjectives(?Config $config = null) : array;
 }

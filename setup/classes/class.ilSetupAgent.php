@@ -5,7 +5,6 @@
 use ILIAS\Setup;
 use ILIAS\Refinery;
 use ILIAS\Data;
-use ILIAS\UI;
 use ILIAS\Setup\ObjectiveCollection;
 use ILIAS\Setup\Config;
 
@@ -70,13 +69,13 @@ class ilSetupAgent implements Setup\Agent
                 $this->getPHPMemoryLimitCondition(),
                 new ilSetupConfigStoredObjective($config),
                 $config->getRegisterNIC()
-                        ? new ilNICKeyRegisteredObjective($config)
-                        : new Setup\ObjectiveCollection(
-                            "",
-                            false,
-                            new ilNICKeyStoredObjective($config),
-                            new ilInstIdDefaultStoredObjective($config)
-                        )
+                    ? new ilNICKeyRegisteredObjective($config)
+                    : new Setup\ObjectiveCollection(
+                    "",
+                    false,
+                    new ilNICKeyStoredObjective($config),
+                    new ilInstIdDefaultStoredObjective($config)
+                )
             )
         );
     }
@@ -133,7 +132,6 @@ class ilSetupAgent implements Setup\Agent
         return [];
     }
 
-
     public function getNamedObjective(string $name, Setup\Config $config = null) : Setup\Objective
     {
         if ($name === "registerNICKey" && is_null($config)) {
@@ -155,11 +153,20 @@ class ilSetupAgent implements Setup\Agent
     public function getNamedObjectives(?Config $config = null) : array
     {
         return [
-            "registerNICKey" => new ObjectiveCollection(
-                "Register NIC key",
-                false,
-                new ilNICKeyRegisteredObjective($config),
-            )
+            new Setup\NamedObjective("registerNICKey", "Register NIC key",
+                static function () use ($config) {
+                    if (is_null($config)) {
+                        throw new \RuntimeException(
+                            "Missing Config for objective 'registerNICKey'."
+                        );
+                    }
+
+                    return new ObjectiveCollection(
+                        "",
+                        false,
+                        new ilNICKeyRegisteredObjective($config),
+                    );
+                })
         ];
     }
 }
