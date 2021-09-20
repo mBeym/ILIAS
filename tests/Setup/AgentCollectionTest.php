@@ -374,8 +374,13 @@ class AgentCollectionTest extends TestCase
         $config = new Setup\NullConfig();
 
         $expected = [
-            "objective-1" => new Setup\ObjectiveCollection("ABC", false, $objective1),
-            "objective-2" => new Setup\ObjectiveCollection("XYZ", false, $objective2)
+
+            "objective-1" => new Setup\NamedObjective("objective-1", "ABC", static function() use ($objective1) {
+                return $objective1;
+            }),
+            "objective-2" => new Setup\NamedObjective("objective-2", "XYZ", static function() use ($objective2) {
+                return $objective2;
+            })
         ];
 
         $agent

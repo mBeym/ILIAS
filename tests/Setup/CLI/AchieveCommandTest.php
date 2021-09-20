@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\StreamOutput;
 use ilUICoreSetupAgent;
 use ilLanguage;
 use ilSetupAgent;
+use ILIAS\Setup\AgentCollection;
 
 class TestConfig implements Config
 {
@@ -152,16 +153,19 @@ class AchieveCommandTest extends TestCase
         );
         $config_reader = $this->createMock(Setup\CLI\ConfigReader::class);
 
-        $setupAgents = [
-            "uicore" => new ilUICoreSetupAgent(),
-            "common" => new ilSetupAgent($refinery, $this->createMock(DataFactory::class))
-        ];
+        $agentCollection = new AgentCollection(
+            $this->refinery,
+            [
+                "uicore" => new ilUICoreSetupAgent(),
+                "common" => new ilSetupAgent($refinery, $this->createMock(DataFactory::class))
+            ]
+        );
 
         $agent_finder = $this->createMock(Setup\AgentFinder::class);
         $agent_finder
             ->expects($this->any())
             ->method("getAgents")
-            ->willReturn(new Setup\AgentCollection($refinery, $setupAgents));
+            ->willReturn($agentCollection);
 
         $command = new Setup\CLI\AchieveCommand($agent_finder, $config_reader, [], $refinery);
 
@@ -178,12 +182,9 @@ class AchieveCommandTest extends TestCase
 
         $outputData = stream_get_contents($output->getStream());
 
-        foreach ($setupAgents as $agentKey => $setupAgent) {
-            $namedObjectives = $setupAgent->getNamedObjectives(new Setup\NullConfig());
-            foreach ($namedObjectives as $name => $objectiveCollection) {
-                $this->assertStringContainsString("$agentKey.$name", $outputData);
-                $this->assertStringContainsString($objectiveCollection->getLabel(), $outputData);
-            }
+        foreach ($agentCollection->getNamedObjectives(new Setup\NullConfig()) as $cmd => $namedObjective) {
+            $this->assertStringContainsString($cmd, $outputData);
+            $this->assertStringContainsString($namedObjective->getDescription(), $outputData);
         }
     }
 }
