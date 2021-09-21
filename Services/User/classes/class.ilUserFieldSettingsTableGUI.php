@@ -146,6 +146,9 @@ class ilUserFieldSettingsTableGUI extends ilTable2GUI
     
                 if ($checked) {
                     $this->tpl->setVariable("CHECKED_" . $up_prop, " checked=\"checked\"");
+                    $this->tpl->setVariable("CURRENT_OPTION_VISIBLE", "1");
+                } else {
+                    $this->tpl->setVariable("CURRENT_OPTION_VISIBLE", "0");
                 }
                 if (isset($a_set[$prop . "_fix_value"])) {
                     $this->tpl->setVariable("DISABLE_" . $up_prop, " disabled=\"disabled\"");
