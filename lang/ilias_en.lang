@@ -4070,6 +4070,7 @@ common#:#usr_new#:#New User
 common#:#usr_settings_explanation_profile#:#Check ‘Visible’ to show fields in the registration form and personal settings. Check ‘Changeable’ to allow the user to change the values. Please note that visible fields can always be entered in the registration form. Required fields are required in the registration form and the personal settings. All data can be changed in the user administration independent on these settings.
 common#:#usr_settings_header_profile#:#Standard User Data Fields
 common#:#usr_settings_saved#:#Global user settings saved successfully!
+common#:#usr_field_change_components_listening#:#Components are listening for changes on a user field
 common#:#usr_settings_visib_lua#:#Visible in Local User Administration
 common#:#usr_settings_changeable_lua#:#Changeable in Local User Administration
 common#:#usr_skin_style#:#Skin / Style
