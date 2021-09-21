@@ -8,7 +8,7 @@ use ILIAS\DI\Container;
 
 abstract class ilUserFieldChangeListener
 {
-    private Container $dic;
+    protected Container $dic;
 
     public function __construct(Container $dic) {
         $this->dic = $dic;
