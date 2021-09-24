@@ -14561,6 +14561,7 @@ dateplaner#:#cal_cal_shared_with#:#Benutzer mit denen der Kalender geteilt wird
 dateplaner#:#cal_consultation_hours_for_user#:#Sprechstunde %1
 dateplaner#:#cal_open_calendar#:#Kalender öffnen
 dateplaner#:#cal_delete_cal#:#Kalender löschen
+mail#:#usrFieldChange_second_mail_visible_in_personal_data#:#Lieber Administrator, im Feld "%" haben Sie das Attribut "%s" verändert. Dies hat zur Folge, dass die bei den Benutzern gewählte E-Mail-Adresse bei der definierten Empfangsart und der Standard für neue Benutzerkonten auf die primäre E-Mail-Adresse geändert wird.
 mail#:#first_email_missing_info#:#Auswahl nicht möglich, da keine E-Mail-Adresse eingetragen wurde
 mail#:#second_email_missing_info#:#Auswahl nicht möglich, da keine zweite E-Mail-Adresse eingetragen wurde
 mail#:#mail_first_email#:#Erste E-Mail-Adresse
