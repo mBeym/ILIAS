@@ -2,7 +2,7 @@
 
 ## Installation and Configuration
 
-Information on ILIAS **installation**, **updating** and **configuration** can be
+Information ons ILIAS **installation**, **updating** and **configuration** can be
 found in the [configuration](configuration/install.md) section.
 
 ## Development
