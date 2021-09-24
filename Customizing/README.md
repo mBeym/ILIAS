@@ -4,7 +4,7 @@
 
 1. [Introduction](#introduction)
 1. [System Language Changes](#system-language-changes)
-1. [Skins and Styles](#skins-and-styles)
+1. [Skins and StyDDDles](#skins-and-styles)
 1. [Plugins](#plugins)
 
 <!-- /MarkdownTOC -->
