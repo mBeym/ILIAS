@@ -25,6 +25,9 @@ use ILIAS\ResourceStorage\StorageHandler\FileSystemBased\FileSystemStorageHandle
 
 require_once("libs/composer/vendor/autoload.php");
 
+global $DIC;
+$DIC = new Container();
+
 // needed for slow queries, etc.
 if (!isset($GLOBALS['ilGlobalStartTime']) || !$GLOBALS['ilGlobalStartTime']) {
     $GLOBALS['ilGlobalStartTime'] = microtime();

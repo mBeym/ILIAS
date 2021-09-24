@@ -51,6 +51,7 @@ abstract class ilDBPdo implements ilDBInterface, ilDBPdoInterface
         try {
             $options = $this->getAttributes();
             $this->pdo = new PDO($this->getDSN(), $this->getUsername(), $this->getPassword(), $options);
+            $this->initSQLMode();
             $this->initHelpers();
         } catch (Exception $e) {
             $this->error_code = $e->getCode();
