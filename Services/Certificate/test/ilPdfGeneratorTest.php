@@ -46,7 +46,8 @@ class ilPdfGeneratorTest extends ilCertificateBaseTestCase
             true,
             '/some/where/background.jpg',
             '/some/where/thumbnail.jpg',
-            300
+            300,
+            'superUniqueCertificateId'
         );
 
         $userCertificateRepository = $this->getMockBuilder(ilUserCertificateRepository::class)
@@ -69,7 +70,7 @@ class ilPdfGeneratorTest extends ilCertificateBaseTestCase
 
         $mathJaxHelper->method('fillXlsFoContent')
             ->willReturn('<xml> Some filled XML content </xml>');
-        
+
         $pdfFileNameFactory = $this->getMockBuilder(ilCertificatePdfFileNameFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -112,7 +113,8 @@ class ilPdfGeneratorTest extends ilCertificateBaseTestCase
             true,
             '/some/where/background.jpg',
             '/some/where/thumbnail.jpg',
-            300
+            300,
+            'superUniqueCertificateId'
         );
 
         $userCertificateRepository = $this->getMockBuilder(ilUserCertificateRepository::class)

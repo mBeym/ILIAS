@@ -40,7 +40,8 @@ class ilUserCertificateTest extends ilCertificateBaseTestCase
             true,
             '/some/where/background.jpg',
             '/some/where/thumbnail.svg',
-            140
+            140,
+            'superUniqueCertificateId'
         );
 
         $this->assertSame(1, $userCertificate->getPatternCertificateId());
@@ -57,5 +58,6 @@ class ilUserCertificateTest extends ilCertificateBaseTestCase
         $this->assertTrue($userCertificate->isCurrentlyActive());
         $this->assertSame('/some/where/background.jpg', $userCertificate->getBackgroundImagePath());
         $this->assertSame(140, $userCertificate->getId());
+        $this->assertSame('superUniqueCertificateId', $userCertificate->getCertificateId());
     }
 }

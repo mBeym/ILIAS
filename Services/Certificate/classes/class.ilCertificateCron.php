@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Data\UUID\Factory;
 use ILIAS\DI\Container;
 use ILIAS\Cron\Schedule\CronJobScheduleType;
 
@@ -28,6 +29,7 @@ class ilCertificateCron extends ilCronJob
 {
     protected ?ilLanguage $lng;
     private ?Container $dic;
+    private ?Factory $uuid_factory;
 
     public function __construct(
         private ?ilCertificateQueueRepository $queueRepository = null,
@@ -39,7 +41,8 @@ class ilCertificateCron extends ilCronJob
         ?ilLanguage $language = null,
         private ?ilCertificateObjectHelper $objectHelper = null,
         private ?ilSetting $settings = null,
-        private ?ilCronManager $cronManager = null
+        private ?ilCronManager $cronManager = null,
+        ?Factory $uuid_factory = null,
     ) {
         if (null === $dic) {
             global $DIC;
@@ -51,6 +54,11 @@ class ilCertificateCron extends ilCronJob
             $language = $dic->language();
             $language->loadLanguageModule('certificate');
         }
+
+        if (!$uuid_factory) {
+            $uuid_factory = new ILIAS\Data\UUID\Factory();
+        }
+        $this->uuid_factory = $uuid_factory;
 
         $this->lng = $language;
     }
@@ -284,7 +292,9 @@ class ilCertificateCron extends ilCronJob
             ILIAS_VERSION_NUMERIC,
             true,
             $template->getBackgroundImagePath(),
-            $thumbnailImagePath
+            $thumbnailImagePath,
+            null,
+            $this->uuid_factory->uuid4AsString()
         );
 
         $persistedUserCertificate = $this->userRepository->save($userCertificate);

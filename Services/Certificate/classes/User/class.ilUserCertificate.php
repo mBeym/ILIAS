@@ -42,7 +42,8 @@ class ilUserCertificate
         private readonly bool $currentlyActive,
         ?string $backgroundImagePath = null,
         ?string $thumbnailImagePath = null,
-        private ?int $id = null
+        private ?int $id = null,
+        private readonly ?string $certificate_id = null
     ) {
         $this->validUntil = (int) $validUntil;
         $this->backgroundImagePath = (string) $backgroundImagePath;
@@ -138,5 +139,10 @@ class ilUserCertificate
     public function getThumbnailImagePath(): string
     {
         return $this->thumbnailImagePath;
+    }
+
+    public function getCertificateId(): ?string
+    {
+        return $this->certificate_id;
     }
 }

@@ -136,7 +136,8 @@ class ilCertificateLearningHistoryProviderTest extends ilCertificateBaseTestCase
                             true,
                             '/some/where/background_1.jpg',
                             '/some/where/else/thumbnail_1.jpg',
-                            40
+                            40,
+                            'superUniqueCertificateId'
                         ),
                         'Course Title',
                         'Course Description'
@@ -159,7 +160,8 @@ class ilCertificateLearningHistoryProviderTest extends ilCertificateBaseTestCase
                             true,
                             '/some/where/background_1.jpg',
                             '/some/where/else/thumbnail_1.jpg',
-                            50
+                            50,
+                            'superUniqueCertificateId'
                         ),
                         'Test Title',
                         'Test Description'

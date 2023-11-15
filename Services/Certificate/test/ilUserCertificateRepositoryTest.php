@@ -78,7 +78,9 @@ class ilUserCertificateRepositoryTest extends ilCertificateBaseTestCase
             'v5.4.0',
             true,
             '/some/where/background.jpg',
-            '/some/where/thumbnail.svg'
+            '/some/where/thumbnail.svg',
+            null,
+            'superUniqueCertificateId'
         );
 
         $repository->save($userCertificate);

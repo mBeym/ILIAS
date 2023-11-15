@@ -18,6 +18,8 @@
 
 declare(strict_types=1);
 
+use ILIAS\Data\UUID\Factory;
+
 require_once 'Services/Calendar/classes/class.ilDateTime.php'; // Required because of global contant IL_CAL_DATE
 
 /**
@@ -33,6 +35,8 @@ class ilDefaultPlaceholderValues implements ilCertificatePlaceholderValues
     private readonly ilLanguage $language;
     private readonly ilCertificateUtilHelper $utilHelper;
     private readonly ilUserDefinedFieldsPlaceholderValues $userDefinedFieldsPlaceholderValues;
+    private readonly Factory $uuid_factory;
+
 
     public function __construct(
         ?ilCertificateObjectHelper $objectHelper = null,
@@ -41,7 +45,8 @@ class ilDefaultPlaceholderValues implements ilCertificatePlaceholderValues
         ?ilLanguage $language = null,
         ?ilCertificateUtilHelper $utilHelper = null,
         ?ilUserDefinedFieldsPlaceholderValues $userDefinedFieldsPlaceholderValues = null,
-        private readonly int $birthdayDateFormat = IL_CAL_DATE
+        ?ILIAS\Data\UUID\Factory $uuid_factory = null,
+        private readonly int $birthdayDateFormat = IL_CAL_DATE,
     ) {
         if (null === $objectHelper) {
             $objectHelper = new ilCertificateObjectHelper();
@@ -75,7 +80,13 @@ class ilDefaultPlaceholderValues implements ilCertificatePlaceholderValues
         }
         $this->userDefinedFieldsPlaceholderValues = $userDefinedFieldsPlaceholderValues;
 
+        if (!$uuid_factory) {
+            $uuid_factory = new ILIAS\Data\UUID\Factory();
+        }
+        $this->uuid_factory = $uuid_factory;
+
         $this->placeholder = [
+            'CERTIFICATE_ID' => '',
             'USER_LOGIN' => '',
             'USER_FULLNAME' => '',
             'USER_FIRSTNAME' => '',
@@ -114,6 +125,7 @@ class ilDefaultPlaceholderValues implements ilCertificatePlaceholderValues
 
         $placeholder = $this->placeholder;
 
+        $placeholder['CERTIFICATE_ID'] = $this->utilHelper->prepareFormOutput($this->uuid_factory->uuid4AsString());
         $placeholder['USER_LOGIN'] = $this->utilHelper->prepareFormOutput((trim($user->getLogin())));
         $placeholder['USER_FULLNAME'] = $this->utilHelper->prepareFormOutput((trim($user->getFullname())));
         $placeholder['USER_FIRSTNAME'] = $this->utilHelper->prepareFormOutput((trim($user->getFirstname())));
@@ -169,6 +181,7 @@ class ilDefaultPlaceholderValues implements ilCertificatePlaceholderValues
     public function getPlaceholderValuesForPreview(int $userId, int $objId): array
     {
         $previewPlacholderValues = [
+            'CERTIFICATE_ID' => $this->utilHelper->prepareFormOutput($this->uuid_factory->uuid4AsString()),
             "USER_LOGIN" => $this->utilHelper->prepareFormOutput($this->language->txt("certificate_var_user_login")),
             "USER_FULLNAME" => $this->utilHelper->prepareFormOutput($this->language->txt("certificate_var_user_fullname")),
             "USER_FIRSTNAME" => $this->utilHelper->prepareFormOutput($this->language->txt("certificate_var_user_firstname")),
