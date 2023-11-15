@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace ILIAS\Certificate\Table;
 
+use DateTime;
+use Exception;
 use Generator;
 use ilCtrl;
 use ilCtrlInterface;
@@ -93,13 +95,24 @@ class CertificateOverviewTable implements DataRetrieval
         ?array $filter_data,
         ?array $additional_parameters
     ): Generator {
-        $table_rows = $this->buildTableRows($this->repo->fetchCertificatesForOverview($range));
         [$order_field, $order_direction] = $order->join([], fn($ret, $key, $value) => [$key, $value]);
+        if (!$filter_data) {
+            $filter_data = [];
+        }
 
+        if (isset($filter_data['issue_date'])) {
+            try {
+                $filter_data['issue_date'] = new DateTime($filter_data['issue_date']);
+            } catch (Exception $e) {
+                $filter_data['issue_date'] = null;
+            }
+        }
+
+        $table_rows = $this->buildTableRows($this->repo->fetchCertificatesForOverview($filter_data, $range));
         $colum_to_order = array_column($table_rows, $order_field);
         array_multisort($colum_to_order, $order_direction === 'ASC' ? SORT_ASC : SORT_DESC, $table_rows);
 
-        foreach ($this->filterTableRows($table_rows) as $row) {
+        foreach ($table_rows as $row) {
             $row['issue_date'] = new ilDateTime($row['issue_date'], IL_CAL_UNIX);
             yield $row_builder->buildDataRow((string) $row['id'], $row);
         }
@@ -107,8 +120,21 @@ class CertificateOverviewTable implements DataRetrieval
 
     public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int
     {
-        return count($this->filterTableRows($this->buildTableRows($this->repo->fetchCertificatesForOverview())));
+        if (!$filter_data) {
+            $filter_data = [];
+        }
+
+        if (isset($filter_data['issue_date'])) {
+            try {
+                $filter_data['issue_date'] = new DateTime($filter_data['issue_date']);
+            } catch (Exception $e) {
+                $filter_data['issue_date'] = null;
+            }
+        }
+
+        return $this->repo->fetchCertificatesForOverviewCount($filter_data);
     }
+
 
     protected function buildFilter(): Standard
     {
@@ -203,25 +229,5 @@ class CertificateOverviewTable implements DataRetrieval
     public function render(): string
     {
         return $this->ui_renderer->render([$this->filter, $this->table]);
-    }
-
-    protected function filterTableRows(array $table_rows): array
-    {
-        $filtered_table_rows = [];
-        $filter_data = $this->ui_service->filter()->getData($this->filter) ?: [];
-
-        foreach ($table_rows as $row) {
-            foreach ($filter_data as $field_name => $filter_value) {
-                if (!$filter_value) {
-                    continue;
-                }
-
-                if (!str_contains((string) $row[$field_name], $filter_value)) {
-                    continue 2;
-                }
-            }
-            $filtered_table_rows[] = $row;
-        }
-        return $filtered_table_rows;
     }
 }

@@ -643,19 +643,117 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
 
     /**
      * @return ilUserCertificate[]
+     * @var array{certificate_id: null|string, issue_date: null|DateTime, object: null|string, owner: null|string} $filter
      */
-    public function fetchCertificatesForOverview(?Range $range = null): array
+    public function fetchCertificatesForOverview(array $filter, ?Range $range = null): array
     {
+        global $DIC;
+        $user = $DIC->user();
+        $sql_filters = [];
+        foreach ($filter as $key => $value) {
+            if ($value === null) {
+                continue;
+            }
+
+            $column_name = $key;
+            switch ($key) {
+                case 'issue_date':
+                    $column_name = 'acquired_timestamp';
+                    break;
+                case 'object':
+                    $column_name = 'object_data.title';
+                    break;
+                case 'owner':
+                    $column_name = 'usr_data.login';
+            }
+
+            if ($key === 'issue_date') {
+                /** @var null|DateTime $value */
+                $sql_filters[] = $this->database->equals(
+                    $column_name,
+                    (string) $value->getTimestamp(),
+                    ilDBConstants::T_INTEGER
+                );
+            } else {
+                $sql_filters[] = $this->database->like($column_name, ilDBConstants::T_TEXT, "%$value%");
+            }
+        }
+
         if ($range) {
             $this->database->setLimit($range->getLength(), $range->getStart());
         }
 
-        $result = $this->database->query('SELECT * FROM il_cert_user_cert', );
+        $result = $this->database->query(
+            'SELECT cert.*, ' .
+            '(CASE
+               WHEN (trans.title IS NOT NULL AND LENGTH(trans.title) > 0) THEN trans.title
+               WHEN (object_data.title IS NOT NULL AND LENGTH(object_data.title) > 0) THEN object_data.title 
+               WHEN (object_data_del.title IS NOT NULL AND LENGTH(object_data_del.title) > 0) THEN object_data_del.title 
+               ELSE ' . $this->database->quote($this->defaultTitle, 'text') . '
+               END
+             ) as object, '
+            . 'usr_data.login AS owner FROM il_cert_user_cert AS cert '
+            . 'LEFT JOIN object_data ON object_data.obj_id = cert.obj_id '
+            . 'INNER JOIN usr_data ON usr_data.usr_id = cert.usr_id '
+            . 'LEFT JOIN object_data_del ON object_data_del.obj_id = cert.obj_id '
+            . 'LEFT JOIN object_translation trans ON trans.obj_id = object_data.obj_id '
+            . 'AND trans.lang_code = ' . $this->database->quote($user->getLanguage(), 'text')
+            . ($sql_filters !== [] ? " AND " . implode(" AND ", $sql_filters) : "")
+        );
 
         $certificates = [];
         while ($row = $this->database->fetchAssoc($result)) {
             $certificates[] = $this->createUserCertificate($row);
         }
         return $certificates;
+    }
+
+    /**
+     * @var array{certificate_id: null|string, issue_date: null|DateTime, object: null|string, owner: null|string} $filter
+     */
+    public function fetchCertificatesForOverviewCount(array $filter, ?Range $range = null): int
+    {
+        $sql_filters = [];
+        foreach ($filter as $key => $value) {
+            if ($value === null) {
+                continue;
+            }
+
+            $column_name = $key;
+            switch ($key) {
+                case 'issue_date':
+                    $column_name = 'acquired_timestamp';
+                    break;
+                case 'object':
+                    $column_name = 'object_data.title';
+                    break;
+                case 'owner':
+                    $column_name = 'usr_data.login';
+            }
+
+            if ($key === 'issue_date') {
+                /** @var null|DateTime $value */
+                $sql_filters[] = $this->database->equals(
+                    $column_name,
+                    (string) $value->getTimestamp(),
+                    ilDBConstants::T_INTEGER
+                );
+            } else {
+                $sql_filters[] = $this->database->like($column_name, ilDBConstants::T_TEXT, "%$value%");
+            }
+        }
+
+        if ($range) {
+            $this->database->setLimit($range->getLength(), $range->getStart());
+        }
+
+        $result = $this->database->query(
+            'SELECT COUNT(id) as count FROM il_cert_user_cert AS cert '
+            . 'LEFT JOIN object_data ON object_data.obj_id = cert.obj_id '
+            . 'INNER JOIN usr_data ON usr_data.usr_id = cert.usr_id'
+            . ($sql_filters !== [] ? ' AND ' . implode(' AND ', $sql_filters) : '')
+        );
+
+        return (int) $this->database->fetchAssoc($result)['count'];
     }
 }
