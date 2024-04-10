@@ -263,9 +263,11 @@ class ilCertificateCron extends ilCronJob
             $type
         ));
 
+        $certId = $this->uuid_factory->uuid4AsString();
         $certificateContent = $template->getCertificateContent();
 
         $placeholderValues = $placeholderValueObject->getPlaceholderValues($userId, $objId);
+        $placeholderValues['CERTIFICATE_ID'] = $certId;
 
         $this->logger->debug(sprintf(
             'Values for placeholders: "%s"',
@@ -274,7 +276,7 @@ class ilCertificateCron extends ilCronJob
 
         $certificateContent = $this->valueReplacement->replace(
             $placeholderValues,
-            $certificateContent
+            $certificateContent,
         );
 
         $thumbnailImagePath = $template->getThumbnailImagePath();
@@ -294,7 +296,7 @@ class ilCertificateCron extends ilCronJob
             $template->getBackgroundImagePath(),
             $thumbnailImagePath,
             null,
-            $this->uuid_factory->uuid4AsString()
+            $certId
         );
 
         $persistedUserCertificate = $this->userRepository->save($userCertificate);

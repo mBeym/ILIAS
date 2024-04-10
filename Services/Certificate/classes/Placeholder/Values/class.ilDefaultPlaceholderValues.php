@@ -125,7 +125,6 @@ class ilDefaultPlaceholderValues implements ilCertificatePlaceholderValues
 
         $placeholder = $this->placeholder;
 
-        $placeholder['CERTIFICATE_ID'] = $this->utilHelper->prepareFormOutput($this->uuid_factory->uuid4AsString());
         $placeholder['USER_LOGIN'] = $this->utilHelper->prepareFormOutput((trim($user->getLogin())));
         $placeholder['USER_FULLNAME'] = $this->utilHelper->prepareFormOutput((trim($user->getFullname())));
         $placeholder['USER_FIRSTNAME'] = $this->utilHelper->prepareFormOutput((trim($user->getFirstname())));
