@@ -24,6 +24,7 @@ use DateTime;
 use DateTimeImmutable;
 use Exception;
 use Generator;
+use ilAccessHandler;
 use ilCtrl;
 use ilCtrlInterface;
 use ilDateTime;
@@ -39,6 +40,7 @@ use ILIAS\UI\Renderer;
 use ILIAS\UI\URLBuilder;
 use ILIAS\UI\URLBuilderToken;
 use ilLanguage;
+use ilLink;
 use ilObjCertificateSettingsGUI;
 use ilObject;
 use ilObjUser;
@@ -64,6 +66,7 @@ class CertificateOverviewTable implements DataRetrieval
     private Standard $filter;
     private Table $table;
     private Renderer $ui_renderer;
+    private ilAccessHandler $access;
 
     public function __construct(
         ?Factory $ui_factory = null,
@@ -73,7 +76,8 @@ class CertificateOverviewTable implements DataRetrieval
         ServerRequestInterface|RequestInterface|null $request = null,
         ?\ILIAS\Data\Factory $data_factory = null,
         ?ilCtrl $ctrl = null,
-        ?Renderer $ui_renderer = null
+        ?Renderer $ui_renderer = null,
+        ?ilAccessHandler $access = null
     ) {
         global $DIC;
         $this->ui_factory = $ui_factory ?: $DIC->ui()->factory();
@@ -84,6 +88,7 @@ class CertificateOverviewTable implements DataRetrieval
         $this->data_factory = $data_factory ?: new \ILIAS\Data\Factory();
         $this->ctrl = $ctrl ?: $DIC->ctrl();
         $this->ui_renderer = $ui_renderer ?: $DIC->ui()->renderer();
+        $this->access = $access ?: $DIC->access();
 
         $this->filter = $this->buildFilter();
         $this->table = $this->buildTable();
@@ -218,11 +223,22 @@ class CertificateOverviewTable implements DataRetrieval
         $table_rows = [];
 
         foreach ($certificates as $certificate) {
+            $refIds = ilObject::_getAllReferences($certificate->getId());
+            $objectTitle = ilObject::_lookupTitle($certificate->getObjId());
+            foreach ($refIds as $refId) {
+                if ($this->access->checkAccess('read', '', $refId)) {
+                    $objectTitle = $this->ui_renderer->render(
+                        $this->ui_factory->link()->standard($objectTitle, ilLink::_getLink($refId))
+                    );
+                    break;
+                }
+            }
+
             $table_rows[] = [
                 'id' => $certificate->getId(),
                 'certificate_id' => $certificate->getCertificateId(),
                 'issue_date' => $certificate->getAcquiredTimestamp(),
-                'object' => ilObject::_lookupTitle($certificate->getObjId()),
+                'object' => $objectTitle,
                 'obj_id' => (string) $certificate->getObjId(),
                 'owner' => ilObjUser::_lookupLogin($certificate->getUserId()),
             ];
