@@ -105,12 +105,14 @@ class CertificateOverviewTable implements DataRetrieval
         $filter_data = $this->ui_service->filter()->getData($this->filter);
         [$order_field, $order_direction] = $order->join([], fn($ret, $key, $value) => [$key, $value]);
 
-        if (isset($filter_data['issue_date'])) {
+        if (isset($filter_data['issue_date']) && $filter_data['issue_date'] !== '') {
             try {
                 $filter_data['issue_date'] = new DateTime($filter_data['issue_date']);
             } catch (Exception $e) {
                 $filter_data['issue_date'] = null;
             }
+        } else {
+            $filter_data['issue_date'] = null;
         }
 
         $table_rows = $this->buildTableRows($this->repo->fetchCertificatesForOverview($filter_data, $range));
@@ -127,12 +129,14 @@ class CertificateOverviewTable implements DataRetrieval
     {
         $filter_data = $this->ui_service->filter()->getData($this->filter);
 
-        if (isset($filter_data['issue_date'])) {
+        if (isset($filter_data['issue_date']) && $filter_data['issue_date'] !== '') {
             try {
                 $filter_data['issue_date'] = new DateTime($filter_data['issue_date']);
             } catch (Exception $e) {
                 $filter_data['issue_date'] = null;
             }
+        } else {
+            $filter_data['issue_date'] = null;
         }
 
         return $this->repo->fetchCertificatesForOverviewCount($filter_data);
