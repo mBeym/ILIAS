@@ -224,7 +224,7 @@ class CertificateOverviewTable implements DataRetrieval
         $table_rows = [];
 
         foreach ($certificates as $certificate) {
-            $refIds = ilObject::_getAllReferences($certificate->getId());
+            $refIds = ilObject::_getAllReferences($certificate->getObjId());
             $objectTitle = ilObject::_lookupTitle($certificate->getObjId());
             foreach ($refIds as $refId) {
                 if ($this->access->checkAccess('read', '', $refId)) {
