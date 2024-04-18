@@ -102,8 +102,8 @@ class CertificateOverviewTable implements DataRetrieval
         ?array $filter_data,
         ?array $additional_parameters
     ): Generator {
+        $filter_data = $this->ui_service->filter()->getData($this->filter);
         [$order_field, $order_direction] = $order->join([], fn($ret, $key, $value) => [$key, $value]);
-        $filter_data = $this->filter->getData(); //filter_data parameter array is empty
 
         if (isset($filter_data['issue_date'])) {
             try {
@@ -125,10 +125,7 @@ class CertificateOverviewTable implements DataRetrieval
 
     public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int
     {
-        $filter_data = $this->filter->getData(); //filter_data parameter array is empty
-        if (!$filter_data) {
-            $filter_data = [];
-        }
+        $filter_data = $this->ui_service->filter()->getData($this->filter);
 
         if (isset($filter_data['issue_date'])) {
             try {
