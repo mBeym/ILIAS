@@ -21,11 +21,13 @@ declare(strict_types=1);
 namespace ILIAS\Certificate\Table;
 
 use DateTime;
+use DateTimeImmutable;
 use Exception;
 use Generator;
 use ilCtrl;
 use ilCtrlInterface;
 use ilDateTime;
+use ILIAS\Data\DateFormat\DateFormat;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
 use ILIAS\UI\Component\Table\DataRetrieval;
@@ -96,9 +98,7 @@ class CertificateOverviewTable implements DataRetrieval
         ?array $additional_parameters
     ): Generator {
         [$order_field, $order_direction] = $order->join([], fn($ret, $key, $value) => [$key, $value]);
-        if (!$filter_data) {
-            $filter_data = [];
-        }
+        $filter_data = $this->filter->getData(); //filter_data parameter array is empty
 
         if (isset($filter_data['issue_date'])) {
             try {
@@ -113,13 +113,14 @@ class CertificateOverviewTable implements DataRetrieval
         array_multisort($colum_to_order, $order_direction === 'ASC' ? SORT_ASC : SORT_DESC, $table_rows);
 
         foreach ($table_rows as $row) {
-            $row['issue_date'] = new ilDateTime($row['issue_date'], IL_CAL_UNIX);
+            $row['issue_date'] = DateTimeImmutable::createFromMutable((new DateTime())->setTimestamp($row['issue_date']));
             yield $row_builder->buildDataRow((string) $row['id'], $row);
         }
     }
 
     public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int
     {
+        $filter_data = $this->filter->getData(); //filter_data parameter array is empty
         if (!$filter_data) {
             $filter_data = [];
         }
@@ -163,7 +164,7 @@ class CertificateOverviewTable implements DataRetrieval
             $this->lng->txt('certificates'),
             [
                 'certificate_id' => $uiTable->column()->text($this->lng->txt('certificate_id')),
-                'issue_date' => $uiTable->column()->text($this->lng->txt('certificate_issue_date')), //ToDo: change to ->date()
+                'issue_date' => $uiTable->column()->date($this->lng->txt('certificate_issue_date'),  $this->data_factory->dateFormat()->withTime24($this->data_factory->dateFormat()->standard())),
                 'object' => $uiTable->column()->text($this->lng->txt('obj')),
                 'owner' => $uiTable->column()->text($this->lng->txt('owner')),
             ],
