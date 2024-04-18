@@ -149,9 +149,10 @@ class CertificateOverviewTable implements DataRetrieval
                 'certificate_id' => $this->ui_factory->input()->field()->text($this->lng->txt('certificate_id')),
                 'issue_date' => $this->ui_factory->input()->field()->text($this->lng->txt('certificate_issue_date')),
                 'object' => $this->ui_factory->input()->field()->text($this->lng->txt('obj')),
+                'obj_id' => $this->ui_factory->input()->field()->text($this->lng->txt('object_id')),
                 'owner' => $this->ui_factory->input()->field()->text($this->lng->txt('owner')),
             ],
-            [true, true, true, true],
+            [true, true, true, true, true],
             true,
             true
         );
@@ -166,6 +167,7 @@ class CertificateOverviewTable implements DataRetrieval
                 'certificate_id' => $uiTable->column()->text($this->lng->txt('certificate_id')),
                 'issue_date' => $uiTable->column()->date($this->lng->txt('certificate_issue_date'),  $this->data_factory->dateFormat()->withTime24($this->data_factory->dateFormat()->standard())),
                 'object' => $uiTable->column()->text($this->lng->txt('obj')),
+                'obj_id' => $uiTable->column()->text($this->lng->txt('object_id')),
                 'owner' => $uiTable->column()->text($this->lng->txt('owner')),
             ],
             $this
@@ -221,6 +223,7 @@ class CertificateOverviewTable implements DataRetrieval
                 'certificate_id' => $certificate->getCertificateId(),
                 'issue_date' => $certificate->getAcquiredTimestamp(),
                 'object' => ilObject::_lookupTitle($certificate->getObjId()),
+                'obj_id' => (string) $certificate->getObjId(),
                 'owner' => ilObjUser::_lookupLogin($certificate->getUserId()),
             ];
         }

@@ -665,6 +665,10 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
                     break;
                 case 'owner':
                     $column_name = 'usr_data.login';
+                    break;
+                case 'obj_id':
+                    $column_name = 'cert.obj_id';
+                    break;
             }
 
             if ($key === 'issue_date') {
@@ -729,6 +733,10 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
                     break;
                 case 'owner':
                     $column_name = 'usr_data.login';
+                    break;
+                case 'obj_id':
+                    $column_name = 'cert.obj_id';
+                    break;
             }
 
             if ($key === 'issue_date') {
