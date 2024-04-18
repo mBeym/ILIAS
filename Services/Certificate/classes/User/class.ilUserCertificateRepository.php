@@ -700,9 +700,8 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
             . 'LEFT JOIN object_data ON object_data.obj_id = cert.obj_id '
             . 'INNER JOIN usr_data ON usr_data.usr_id = cert.usr_id '
             . 'LEFT JOIN object_data_del ON object_data_del.obj_id = cert.obj_id '
-            . 'LEFT JOIN object_translation trans ON trans.obj_id = object_data.obj_id '
-            . 'AND trans.lang_code = ' . $this->database->quote($user->getLanguage(), 'text')
-            . ($sql_filters !== [] ? " AND " . implode(" AND ", $sql_filters) : "")
+            . 'LEFT JOIN object_translation trans ON trans.obj_id = object_data.obj_id AND trans.lang_code = ' . $this->database->quote($user->getLanguage(), 'text')
+            . ($sql_filters !== [] ? " WHERE " . implode(" AND ", $sql_filters) : "")
         );
 
         $certificates = [];
