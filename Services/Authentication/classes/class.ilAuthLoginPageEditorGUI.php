@@ -18,6 +18,8 @@ declare(strict_types=1);
  *
  *********************************************************************/
 
+use ILIAS\Style\Content\GUIService;
+
 /**
  * Login page editor settings GUI
  * ILIAS page editor or richtext editor
@@ -49,6 +51,7 @@ class ilAuthLoginPageEditorGUI
     private ?int $key = null;
     private array $visible_languages = [];
     private array $languages = [];
+    private GUIService $content_style_gui;
 
     public function __construct(int $a_ref_id)
     {
@@ -68,9 +71,12 @@ class ilAuthLoginPageEditorGUI
         $this->ref_id = $a_ref_id;
 
         $this->settings = ilAuthLoginPageEditorSettings::getInstance();
-        $this->content_style_domain = $DIC->contentStyle()
-                                          ->domain()
-                                          ->styleForRefId($a_ref_id);
+
+        $content_style = $DIC->contentStyle();
+        $this->content_style_domain = $content_style
+            ->domain()
+            ->styleForRefId($a_ref_id);
+        $this->content_style_gui = $content_style->gui();
 
         $query_wrapper = $DIC->http()->wrapper()->query();
         $post_wrapper = $DIC->http()->wrapper()->post();
@@ -153,7 +159,7 @@ class ilAuthLoginPageEditorGUI
 
         $this->tpl->addCss(ilObjStyleSheet::getContentStylePath(0));
         $this->tpl->addCss(ilObjStyleSheet::getSyntaxStylePath());
-
+        $this->content_style_gui->addCss($this->tpl,  $this->getRefId());
 
         $this->ctrl->setReturnByClass('illoginpagegui', "edit");
         $page_gui = new ilLoginPageGUI($this->key);

@@ -949,6 +949,18 @@ class ilStartUpGUI implements ilCtrlBaseClassInterface, ilCtrlSecurityInterface
             return '';
         }
 
+        $auth_settings_obj_data = $this->dic->database()->fetchAssoc(
+            $this->dic->database()->queryF(
+                "SELECT ref_id FROM object_reference WHERE obj_id = (SELECT obj_id FROM object_data WHERE type = %s)",
+                [ilDBConstants::T_TEXT],
+                ['auth']
+            )
+        );
+        $this->dic->contentStyle()->gui()->addCss($this->mainTemplate, (int) $auth_settings_obj_data['ref_id']);
+        //$this->mainTemplate->setCurrentBlock('SyntaxStyle');
+        //$this->mainTemplate->setVariable('LOCATION_SYNTAX_STYLESHEET', ilObjStyleSheet::getSyntaxStylePath());
+        //$this->mainTemplate->parseCurrentBlock();
+
         // get page object
         $page_gui = new ilLoginPageGUI(ilLanguage::lookupId($active_lang));
 
