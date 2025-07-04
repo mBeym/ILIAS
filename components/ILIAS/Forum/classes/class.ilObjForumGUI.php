@@ -17,7 +17,9 @@
  *********************************************************************/
 
 declare(strict_types=1);
+use ILIAS\Forum\ForumDraftAccess;
 use ILIAS\Forum\Thread\ForumThreadTableSessionStorage;
+use ILIAS\Forum\ThreadBelongsToForum;
 use ILIAS\UI\Factory;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Dropdown\Standard;
@@ -544,6 +546,45 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
                 break;
             case strtolower(ForumStatisticsGUI::class):
                 $this->ctrl->forwardCommand(new ForumStatisticsGUI($this->getRefId()));
+                break;
+            case strtolower(ForumFileDeliveryGUI::class):
+                $forum_draft_access_adapter = new readonly class (
+                    function(int|ilForumPostDraft $draft): void {
+                        $this->checkDraftAccess($draft);
+                    }
+                ) implements ForumDraftAccess {
+                    public function __construct(private Closure $closure)
+                    {
+                    }
+                    public function checkDraftAccess(int|ilForumPostDraft $draft): void
+                    {
+                        ($this->closure)($draft);
+                    }
+                };
+
+                $thread_belongs_to_forum_adapter = new readonly class (
+                    function(int $objId, ilForumTopic $thread): void {
+                        $this->ensureThreadBelongsToForum($objId, $thread);
+                    }
+                ) implements ThreadBelongsToForum {
+                    public function __construct(private Closure $closure)
+                    {
+                    }
+
+                    public function ensureThreadBelongsToForum(int $objId, ilForumTopic $thread): void
+                    {
+                        ($this->closure)($objId, $thread);
+                    }
+                };
+
+                $forum_file_delivery_gui = new ForumFileDeliveryGUI(
+                    $this->getRefId(),
+                    $this->retrieveDraftId(),
+                    $this->objCurrentPost,
+                    $forum_draft_access_adapter,
+                    $thread_belongs_to_forum_adapter,
+                );
+                $this->ctrl->forwardCommand($forum_file_delivery_gui);
                 break;
             default:
                 if (in_array($cmd, ['close', 'reopen', 'make_topics_non_sticky', 'makesticky', 'editThread', 'move'])) {
@@ -1141,7 +1182,10 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
                     $download_zip_button = $this->uiFactory->button()
                                                            ->standard(
                                                                $this->lng->txt('download'),
-                                                               $this->ctrl->getLinkTarget($this, 'deliverDraftZipFile')
+                                                               $this->ctrl->getLinkTargetByClass(
+                                                                   ForumFileDeliveryGUI::class,
+                                                                   ForumFileDeliveryGUI::CMD_DELIVER_DRAFT_ZIP_FILE
+                                                               )
                                                            );
                     $this->ctrl->setParameter($this, 'draft_id', '');
                     $tpl->setVariable('DOWNLOAD_ZIP', $this->uiRenderer->render($download_zip_button));
@@ -1334,7 +1378,10 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
                 $download_zip_button = $this->uiFactory->button()
                                                        ->standard(
                                                            $this->lng->txt('download'),
-                                                           $this->ctrl->getLinkTarget($this, 'deliverZipFile')
+                                                           $this->ctrl->getLinkTargetByClass(
+                                                               ForumFileDeliveryGUI::class,
+                                                               ForumFileDeliveryGUI::CMD_DELIVER_ZIP_FILE
+                                                           )
                                                        );
                 $tpl->setVariable('DOWNLOAD_ZIP', $this->uiRenderer->render($download_zip_button));
             }
@@ -3092,15 +3139,22 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
         $oForumObjects = $this->getForumObjects();
         $forumObj = $oForumObjects['forumObj'];
         $frm = $oForumObjects['frm'];
-        $file_obj = $oForumObjects['file_obj'];
 
-        $selected_draft_id = (int) ($this->httpRequest->getQueryParams()['draft_id'] ?? 0);
-        if (isset($this->httpRequest->getQueryParams()['file'])) {
-            $file_obj_for_delivery = $file_obj;
-            if ($selected_draft_id > 0 && ilForumPostDraft::isSavePostDraftAllowed()) {
-                $file_obj_for_delivery = new ilFileDataForumDrafts($forumObj->getId(), $selected_draft_id);
-            }
-            $file_obj_for_delivery->deliverFile(ilUtil::stripSlashes($this->httpRequest->getQueryParams()['file']));
+        $file = $this->http->wrapper()->query()->retrieve(
+            'file',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always(null)
+            ])
+        );
+        if ($file) {
+            $this->ctrl->setParameterByClass(ForumFileDeliveryGUI::class, 'pos_pk', $this->objCurrentPost->getId());
+            $this->ctrl->setParameterByClass(ForumFileDeliveryGUI::class, 'draft_id', $this->retrieveDraftId());
+            $this->ctrl->setParameterByClass(ForumFileDeliveryGUI::class, 'file', $file);
+            $this->ctrl->redirectByClass(
+                ForumFileDeliveryGUI::class,
+                ForumFileDeliveryGUI::CMD_DELIVER_FILE
+            );
         }
 
         if ($this->objCurrentTopic->getId() === 0) {
@@ -4749,34 +4803,6 @@ EOD
         $this->tpl->setRightContent($content);
     }
 
-    protected function deliverDraftZipFileObject(): void
-    {
-        if (!$this->access->checkAccess('read', '', $this->object->getRefId())) {
-            $this->error->raiseError($this->lng->txt('permission_denied'), $this->error->MESSAGE);
-        }
-
-        $draft = ilForumPostDraft::newInstanceByDraftId($this->retrieveDraftId());
-        $this->checkDraftAccess($draft);
-        $fileData = new ilFileDataForumDrafts(0, $draft->getDraftId());
-        if (!$fileData->deliverZipFile()) {
-            $this->ctrl->redirect($this);
-        }
-    }
-
-    protected function deliverZipFileObject(): void
-    {
-        if (!$this->access->checkAccess('read', '', $this->object->getRefId())) {
-            $this->error->raiseError($this->lng->txt('permission_denied'), $this->error->MESSAGE);
-        }
-
-        $this->ensureThreadBelongsToForum($this->object->getId(), $this->objCurrentPost->getThread());
-
-        $fileData = new ilFileDataForum($this->object->getId(), $this->objCurrentPost->getId());
-        if (!$fileData->deliverZipFile()) {
-            $this->ctrl->redirect($this);
-        }
-    }
-
     protected function editThreadDraftObject(?ilPropertyFormGUI $form = null): void
     {
         if (!ilForumPostDraft::isSavePostDraftAllowed() ||
@@ -5646,7 +5672,7 @@ EOD
     {
         $draft = is_int($draft) ? ilForumPostDraft::newInstanceByDraftId($draft) : $draft;
         return (
-            $draft->getDraftId() > 1 &&
+            $draft->getDraftId() > 0 &&
             !$this->user->isAnonymous() &&
             $this->access->checkAccess('add_reply', '', $this->object->getRefId()) &&
             $this->user->getId() === $draft->getPostAuthorId()
