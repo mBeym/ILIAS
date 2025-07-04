@@ -17,7 +17,6 @@
  *********************************************************************/
 
 declare(strict_types=1);
-
 use ILIAS\Forum\Thread\ForumThreadTableSessionStorage;
 use ILIAS\UI\Factory;
 use ILIAS\UI\Renderer;
@@ -543,7 +542,9 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
                 $news_set_gui->setPublicNotification(true);
                 $this->ctrl->forwardCommand($news_set_gui);
                 break;
-
+            case strtolower(ForumStatisticsGUI::class):
+                $this->ctrl->forwardCommand(new ForumStatisticsGUI($this->getRefId()));
+                break;
             default:
                 if (in_array($cmd, ['close', 'reopen', 'make_topics_non_sticky', 'makesticky', 'editThread', 'move'])) {
                     $cmd = 'performThreadsAction';
@@ -1669,12 +1670,12 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
             }
 
             if ($hasStatisticsAccess) {
-                $force_active = $this->ctrl->getCmd() === 'showStatistics';
+                $force_active = $this->ctrl->getCmd() === ForumStatisticsGUI::CMD_SHOW;
                 $this->tabs_gui->addTarget(
                     self::UI_TAB_ID_STATS,
-                    $this->ctrl->getLinkTarget($this, 'showStatistics'),
-                    'showStatistics',
-                    static::class,
+                    $this->ctrl->getLinkTargetByClass(ForumStatisticsGUI::class, ForumStatisticsGUI::CMD_SHOW),
+                    ForumStatisticsGUI::CMD_SHOW,
+                    ForumStatisticsGUI::class,
                     '',
                     $force_active
                 );
@@ -1698,43 +1699,6 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
                 'ilpermissiongui'
             );
         }
-    }
-
-    public function showStatisticsObject(): void
-    {
-        if (!$this->settings->get('enable_fora_statistics', '0')) {
-            $this->error->raiseError($this->lng->txt('permission_denied'), $this->error->MESSAGE);
-        }
-
-        if (!$this->access->checkAccess('read', '', $this->object->getRefId())) {
-            $this->error->raiseError($this->lng->txt('permission_denied'), $this->error->MESSAGE);
-        }
-
-        if (!$this->objProperties->isStatisticEnabled()) {
-            if ($this->access->checkAccess('write', '', $this->object->getRefId())) {
-                $this->tpl->setOnScreenMessage('info', $this->lng->txt('frm_statistics_disabled_for_participants'));
-            } else {
-                $this->error->raiseError($this->lng->txt('permission_denied'), $this->error->MESSAGE);
-            }
-        }
-
-        $this->object->Forum->setForumId($this->object->getId());
-
-        $tbl = new \ILIAS\Forum\Statistics\ForumStatisticsTable(
-            $this->object,
-            $this->objProperties,
-            ilLearningProgressAccess::checkAccess($this->object->getRefId()),
-            $this->access->checkRbacOrPositionPermissionAccess(
-                'read_learning_progress',
-                'read_learning_progress',
-                $this->object->getRefId()
-            ),
-            $this->user,
-            $this->ui_factory,
-            $this->request,
-            $this->lng
-        );
-        $this->tpl->setContent($this->uiRenderer->render($tbl->getComponent()));
     }
 
     public static function _goto($a_target, $a_thread = 0, $a_posting = 0): void
