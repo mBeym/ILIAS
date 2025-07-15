@@ -4,7 +4,9 @@
 $idpentityid  = isset($_GET['idpentityid']) ? $_GET['idpentityid'] : NULL;
 // ilias-patch: end
 $config = array(
-
+    'ilias:IliasSamlIdp' => [
+        'ilias:IliasSamlIdp'
+    ],
     // This is a authentication source which handles admin authentication.
     'admin' => array(
         // The default is to use core:AdminPassword, but it can be replaced with
