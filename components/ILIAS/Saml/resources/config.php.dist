@@ -2,11 +2,16 @@
 /* Copyright (c) 1998-2017 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 // ilias-patch: begin
-$metadataFiles = glob(rtrim(realpath(__DIR__ . '/../metadata'), '/') . '/*.xml');
-$metadataSources = array();
-foreach($metadataFiles as $file)
-{
-	$metadataSources[]= array('type' => 'xml', 'file' => $file);
+$metadata_sources = array();
+$metadata_files = [
+	"xml" => glob(rtrim(realpath(__DIR__ . '/../metadata'), '/') . '/*.xml'),
+	"flatfile" => glob(rtrim(realpath(__DIR__ . '/../metadata'), '/') . '/*.php')
+];
+
+foreach ($metadata_files as $type => $files) {
+	foreach ($files as $file) {
+		$metadata_sources[] = ['type' => $type, 'file' => $file];
+	}
 }
 // ilias-patch: end
 /*
@@ -604,7 +609,7 @@ $config = array(
      *     ),
      */
      // ilias-patch: begin
-    'metadata.sources' => $metadataSources,
+    'metadata.sources' => $metadata_sources,
      // ilias-patch: end
 
     /*
