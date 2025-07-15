@@ -37,7 +37,7 @@ $config = array(
      * reverse proxy).
      */
     'baseurlpath'           => '',
-    'certdir' => 'cert/',
+    'certdir' => '[[CERT_DIRECTORY]]',
     'loggingdir'            => '[[LOG_DIRECTORY]]',
     'datadir' => 'data/',
 

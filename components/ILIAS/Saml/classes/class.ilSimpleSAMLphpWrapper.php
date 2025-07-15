@@ -56,7 +56,8 @@ final class ilSimpleSAMLphpWrapper implements ilSamlAuth
                 return substr(str_replace('+', '.', base64_encode(ilPasswordUtils::getBytes(20))), 0, 10);
             },
             'COOKIE_PATH' => IL_COOKIE_PATH,
-            'LOG_DIRECTORY' => ilLoggingDBSettings::getInstance()->getLogDir()
+            'LOG_DIRECTORY' => ilLoggingDBSettings::getInstance()->getLogDir(),
+            'CERT_DIRECTORY' => dirname($configurationPath) . "/cert"
         ]);
         $templateHandler->copy('../components/ILIAS/Saml/resources/authsources.php.dist', 'auth/saml/config/authsources.php', [
             'RELAY_STATE' => rtrim(ILIAS_HTTP_PATH, '/') . '/saml.php',
