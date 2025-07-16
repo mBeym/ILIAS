@@ -1,0 +1,11 @@
+{
+  "name": "ilias/simplesamlphp-module-ilias",
+  "description": "A SimpleSamlPhp module that makes it possible to use ILIAS as a SAML IDP",
+  "type": "simplesamlphp-module",
+  "require": {
+    "simplesamlphp/composer-module-installer": "^1.3"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  }
+}

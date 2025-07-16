@@ -63,6 +63,15 @@ final class ilSimpleSAMLphpWrapper implements ilSamlAuth
             'RELAY_STATE' => rtrim(ILIAS_HTTP_PATH, '/') . '/saml.php',
             'SP_ENTITY_ID' => rtrim(ILIAS_HTTP_PATH, '/') . '/metadata.php'
         ]);
+        $parsed_url = parse_url(ILIAS_HTTP_PATH);
+        $templateHandler->copy(
+            '../components/ILIAS/Saml/resources/saml20-idp-hosted.php.dist',
+            'auth/saml/metadata/saml20-idp-hosted.php',
+            [
+                'HOST' => $parsed_url["host"],
+                'HTTP_PATH' => $parsed_url["scheme"] . "://" . $parsed_url["host"]
+            ]
+        );
     }
 
     public function getAuthId(): string
