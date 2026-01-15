@@ -172,6 +172,11 @@ class URLBuilder
         return $clone;
     }
 
+    public function getParameters(): array
+    {
+        return $this->params;
+    }
+
     /**
      * Renders a Javascript Map of all given tokens
      *
@@ -211,9 +216,9 @@ class URLBuilder
      *
      * @throws \LengthException if length of URI is greater than self::URL_MAX_LENGTH
      */
-    public function buildURI(): URI
+    public function buildURI(bool $withParams = true): URI
     {
-        $uri = new URI($this->uri->getBaseURI() . $this->buildQuery() . $this->buildFragment());
+        $uri = new URI($this->uri->getBaseURI() . $this->buildQuery($withParams) . $this->buildFragment());
         $this->checkLength($uri);
         return $uri;
     }
@@ -224,9 +229,9 @@ class URLBuilder
      * numeric indizes of array-parameters are being removed to ensure
      * continous numeration (p[1]=A&p[2]=B --> p[]=A&p[]=B).
      */
-    private function buildQuery(): string
+    private function buildQuery(bool $withParams = true): string
     {
-        $params = array_merge($this->uri->getParameters(), $this->params);
+        $params = array_merge($this->uri->getParameters(), $withParams ? $this->params : []);
         $query = (! empty($params)) ? '?' . http_build_query($params) : '';
         $query = preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D', $query);
         return $query;

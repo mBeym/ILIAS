@@ -119,7 +119,7 @@ final readonly class ilSamlIdpTableGUI implements \ILIAS\UI\Component\Table\Data
                 $this->lng->txt('edit'),
                 $this->url_builder->withParameter($this->action_parameter_token, self::TABLE_ACTION_SHOW_IDP_SETTINGS),
                 $this->row_id_token
-            ),
+            )->withIsMutating(), //Testing code
             'activate' => $this->ui_factory->table()->action()->single(
                 $this->lng->txt('activate'),
                 $this->url_builder->withParameter($this->action_parameter_token, self::TABLE_ACTION_ACTIVATE_IDP),

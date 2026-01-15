@@ -489,7 +489,35 @@ class Renderer extends AbstractComponentRenderer
         foreach ($actions as $action_id => $act) {
             $signal = clone $action_signal;
             $signal->addOption(Action::OPT_ACTIONID, $action_id);
-            $buttons[] = $f->button()->shy($act->getLabel(), $signal);
+            $button = $f->button()->shy($act->getLabel(), $act->isMutating() ? "" : $signal);
+            $a = (string) $signal;
+            if ($act->isMutating()) {
+                $params = $act->getUrlBuilder()->getParameters();
+                $target = $act->getTarget(false);
+
+                $jsonParams = json_encode($params, JSON_THROW_ON_ERROR);
+
+                $button = $button->withAdditionalOnLoadCode(function ($id) use ($jsonParams, $target) {
+                    //$action = str_replace("&amp;", "&", $action);
+                    return "document.querySelector('#$id').addEventListener('click', event => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '$target';
+                        form.addEventListener('formdata', (event) => {
+                            const formData = event.formData;
+                            const params = $jsonParams;
+                            Object.keys(params).forEach(function(key) {
+                                const value = params[key];
+                                formData.append(key, value);
+                            });
+                        });
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    });";
+                });
+            }
+            $buttons[] = $button;
         }
 
         $buttons[] = $f->divider()->horizontal();
@@ -641,7 +669,36 @@ class Renderer extends AbstractComponentRenderer
             if ($target instanceof URI) {
                 $target = (string) $target;
             }
-            $buttons[] = $f->button()->shy($act->getLabel(), $target);
+            $button = $f->button()->shy($act->getLabel(), $act->isMutating() ? "" : $target);
+            if ($act->isMutating()) {
+                $params = $act->getUrlBuilder()->getParameters();
+                $target = $act->getTarget(false);
+
+                $jsonParams = json_encode($params, JSON_THROW_ON_ERROR);
+
+                $button = $button->withAdditionalOnLoadCode(function ($id) use ($jsonParams, $target) {
+                    //$action = str_replace("&amp;", "&", $action);
+                    return "document.querySelector('#$id').addEventListener('click', event => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '$target';
+                        form.addEventListener('formdata', (event) => {
+                            const formData = event.formData;
+                            const params = $jsonParams;
+                            Object.keys(params).forEach(function(key) {
+                                const value = params[key];
+                                formData.append(key, value);
+                            });
+                        });
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    });";
+                });
+            }
+
+
+            $buttons[] = $button;
         }
         return $f->dropdown()->standard($buttons);
     }

@@ -26,4 +26,5 @@ use ILIAS\Data\URI;
 interface Action extends \ILIAS\UI\Component\Component
 {
     public function withAsync(bool $async = true): self;
+    public function withIsMutating() : self;
 }

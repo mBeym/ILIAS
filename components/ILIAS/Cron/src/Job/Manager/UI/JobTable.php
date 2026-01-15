@@ -416,12 +416,12 @@ class JobTable implements \ILIAS\UI\Component\Table\DataRetrieval
                 $this->lng->txt('cron_action_activate'),
                 $this->url_builder->withParameter($this->action_parameter_token, 'activate'),
                 $this->row_id_token
-            ),
+            )->withIsMutating(), //Testing code
             'deactivate' => $this->ui_factory->table()->action()->standard(
                 $this->lng->txt('cron_action_deactivate'),
                 $this->url_builder->withParameter($this->action_parameter_token, 'deactivate'),
                 $this->row_id_token
-            ),
+            )->withIsMutating(), //Testing code
             'reset' => $this->ui_factory->table()->action()->standard(
                 $this->lng->txt('cron_action_reset'),
                 $this->url_builder->withParameter($this->action_parameter_token, 'reset'),

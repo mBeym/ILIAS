@@ -40,13 +40,13 @@ abstract class Action implements I\Action
 
     protected Signal|URI $target;
     protected bool $async = false;
+    protected bool $mutating = false;
 
     public function __construct(
         protected string $label,
         protected URLBuilder $url_builder,
         protected URLBuilderToken $row_id_parameter
     ) {
-        $this->target = $url_builder->buildURI();
     }
 
     public function getLabel(): string
@@ -54,9 +54,9 @@ abstract class Action implements I\Action
         return $this->label;
     }
 
-    public function getTarget(): Signal|URI
+    public function getTarget(bool $withParams = true): Signal|URI
     {
-        return $this->target;
+        return $this->url_builder->buildURI($withParams);
     }
 
     public function withSignalTarget(Signal $target): self
@@ -78,8 +78,28 @@ abstract class Action implements I\Action
         return $this->async;
     }
 
+    public function withIsMutating(bool $mutating = true): self
+    {
+        $clone = clone $this;
+        $clone->mutating = $mutating;
+        return $clone;
+    }
+
+    public function isMutating(): bool
+    {
+        return $this->mutating;
+    }
+
+    public function getUrlBuilder(): URLBuilder
+    {
+        return $this->url_builder;
+    }
+
     public function withRowId(string $row_id): self
     {
+        if ($row_id === "cron_jobs_jid") {
+            $a = "";
+        }
         $clone = clone $this;
         $target = $clone->getTarget();
 
@@ -87,13 +107,16 @@ abstract class Action implements I\Action
             $target->addOption('rowid', $row_id);
         }
         if ($target instanceof URI) {
-            $target = $this->url_builder->withParameter(
-                $this->row_id_parameter,
-                [$row_id]
-            )
-            ->buildURI();
+            $clone = new static(
+                $this->label,
+                $this->url_builder->withParameter(
+                    $this->row_id_parameter,
+                    [$row_id]
+                ),
+                $this->row_id_parameter
+            );
+            $clone = $clone->withIsMutating($this->isMutating());
         }
-        $clone->target = $target;
         return $clone;
     }
 
