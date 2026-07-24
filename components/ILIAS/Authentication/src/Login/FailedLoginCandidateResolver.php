@@ -20,6 +20,11 @@ declare(strict_types=1);
 
 namespace ILIAS\Authentication\Login;
 
+use ilAuthModeDetermination;
+use ilAuthUtils;
+use ilDBConstants;
+use ilObjUser;
+
 final readonly class FailedLoginCandidateResolver
 {
     private \ilDBInterface $db;
@@ -35,17 +40,70 @@ final readonly class FailedLoginCandidateResolver
      */
     public function resolve(\ilAuthCredentials $credentials): array
     {
-        $login = $credentials->getUsername();
-        if ($login === '') {
+        $auth_determination = ilAuthModeDetermination::_getInstance();
+        if ($credentials->getAuthMode() !== '') {
+            $auth_modes = [
+                $credentials->getAuthMode()
+            ];
+        } else {
+            $auth_modes = $auth_determination->getAuthModeSequence($credentials->getUsername());
+        }
+
+        $determined_logins = [];
+
+        foreach (array_filter($auth_modes) as $auth_mode) {
+            if ((int) $auth_mode !== ilAuthUtils::AUTH_LOCAL) {
+                $login = ilObjUser::_checkExternalAuthAccount(
+                    ilAuthUtils::_getAuthModeName($auth_mode),
+                    $credentials->getUsername(),
+                    false
+                );
+                if (!is_string($login) || $login === '') {
+                    continue;
+                }
+
+                $determined_logins[] = $login;
+            }
+
+            $login = $credentials->getUsername();
+            if ($login === '') {
+                continue;
+            }
+
+            $determined_logins[] = $login;
+        }
+
+        if ($determined_logins === []) {
             return [];
         }
 
-        $query = 'SELECT usr_id FROM usr_data WHERE login = %s';
-        $result = $this->db->queryF($query, ['text'], [$login]);
+        $determined_logins = array_unique($determined_logins);
+
+        $query = 'SELECT usr_id, auth_mode FROM usr_data WHERE ' . $this->db->in('login', $determined_logins, false, ilDBConstants::T_TEXT);
+        $result = $this->db->query($query);
 
         $ids = [];
         while ($record = $this->db->fetchAssoc($result)) {
-            $ids[] = new UserId((int) $record['usr_id']);
+            $usr_id = (int) $record['usr_id'];
+            $usr_auth_mode = $record['auth_mode'];
+            foreach (array_filter($auth_modes) as $auth_mode) {
+                if ((int) $auth_mode === ilAuthUtils::AUTH_LOCAL) {
+                    // Mantis #47987: A failed local login must only count against an
+                    // account that can actually be authenticated locally. Without this
+                    // check, external accounts (e.g., Shibboleth/SAML) whose login name
+                    // is entered in the local login form get their login attempts
+                    // incremented and are eventually deactivated - even though a local
+                    // login is impossible for them because "Allow Local Authentication"
+                    // is disabled. This mirrors the gate in ilAuthProviderDatabase.
+                    if (
+                        $usr_id <= 0
+                        || !ilAuthUtils::isLocalPasswordEnabledForAuthMode((int) ilAuthUtils::_getAuthMode($usr_auth_mode))
+                    ) {
+                        continue 2;
+                    }
+                }
+            }
+            $ids[] = new UserId($usr_id);
         }
 
         return $ids;

@@ -314,26 +314,6 @@ class ilAuthFrontend implements ilAuthFrontendInterface
     protected function handleLoginAttempts(): void
     {
         $candidate_usr_ids = $this->failed_login_candidate_resolver->resolve($this->getCredentials());
-
-        //ToDo: Missing check that needs reimplementation
-        /**
-        if ((int) $auth_mode === ilAuthUtils::AUTH_LOCAL) {
-            $local_usr_id = ilObjUser::_lookupId($this->getCredentials()->getUsername());
-            // Mantis #47987: A failed local login must only count against an
-            // account that can actually be authenticated locally. Without this
-            // check, external accounts (e.g., Shibboleth/SAML) whose login name
-            // is entered in the local login form get their login attempts
-            // incremented and are eventually deactivated - even though a local
-            // login is impossible for them because "Allow Local Authentication"
-            // is disabled. This mirrors the gate in ilAuthProviderDatabase.
-            if (is_int($local_usr_id) && $local_usr_id > 0 && ilAuthUtils::isLocalPasswordEnabledForAuthMode(
-                    (int) ilAuthUtils::_getAuthMode(ilObjUser::_lookupAuthMode($local_usr_id))
-                )) {
-                $usr_id_candidates[] = $local_usr_id;
-            }
-            continue;
-        }**/
-
         $result = $this->record_failed_login_attempts->execute($candidate_usr_ids);
         if ($result->value() > 0) {
             $this->getStatus()->setReason('auth_err_invalid_user_account');
