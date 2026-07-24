@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 use ILIAS\Authentication\Setup\AbandonCASAuthModeUpdateObjective;
 use ILIAS\Authentication\Setup\AuthenticationDatabaseUpdateSteps;
+use ILIAS\Authentication\Setup\Migration\UserAuthDataMigration;
 use ILIAS\Setup;
 use ILIAS\Refinery;
 
@@ -84,6 +85,8 @@ class ilAuthenticationSetupAgent implements Setup\Agent
 
     public function getMigrations(): array
     {
-        return [];
+        return [
+            new UserAuthDataMigration()
+        ];
     }
 }
