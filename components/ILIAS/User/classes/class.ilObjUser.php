@@ -16,6 +16,9 @@
  *
  *********************************************************************/
 
+use ILIAS\Authentication\Login\Model\UserAuthData;
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
+use ILIAS\Authentication\Login\UserId;
 use ILIAS\User\LocalDIC;
 use ILIAS\User\Context;
 use ILIAS\User\Profile\Data;
@@ -84,6 +87,7 @@ class ilObjUser extends ilObject
     private ProfileDataRepository $profile_data_repository;
     private ProfileConfigurationRepository $profile_configuration_repository;
     private SettingsDataRepository $settings_data_repository;
+    private UserAuthDataRepository $user_auth_data_repository;
 
     private StreamDelivery $delivery;
     private DataFactory $data_factory;
@@ -92,6 +96,7 @@ class ilObjUser extends ilObject
     private ilSetting $ilias_settings;
     private ilAuthSession $auth_session;
     private ilCtrl $ctrl;
+    private UserAuthData $user_auth_data;
 
     public function __construct(
         int $a_user_id = 0,
@@ -114,6 +119,7 @@ class ilObjUser extends ilObject
         $this->profile_data = $this->profile_data_repository->getDefault();
         $this->profile_configuration_repository = $local_dic[ProfileConfigurationRepository::class];
         $this->settings_data_repository = $local_dic[SettingsDataRepository::class];
+        $this->user_auth_data_repository = $local_dic[UserAuthDataRepository::class];
 
         $this->data_factory = (new DataFactory());
 
@@ -148,6 +154,8 @@ class ilObjUser extends ilObject
         $this->assignSystemInformationFromDB($this->profile_data->getSystemInformation());
 
         $this->readSettings();
+
+        $this->user_auth_data = $this->user_auth_data_repository->getFor(new UserId($this->getId()));
 
         parent::read();
     }
@@ -1233,6 +1241,11 @@ class ilObjUser extends ilObject
     public function getExternalAccount(): string
     {
         return $this->ext_account;
+    }
+
+    public function getUserAuthData(): UserAuthData
+    {
+        return $this->user_auth_data;
     }
 
     /**

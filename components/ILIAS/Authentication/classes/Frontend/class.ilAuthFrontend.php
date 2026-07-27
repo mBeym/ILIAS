@@ -23,8 +23,8 @@ use ILIAS\Authentication\Login\CompleteSuccessfulLogin;
 use ILIAS\Authentication\Login\LoginSubjectFactory;
 use ILIAS\Authentication\Login\FailedLoginCandidateResolver;
 use ILIAS\Authentication\Login\Adapter\SecuritySettingsAdapter;
-use ILIAS\Authentication\Login\Adapter\UserAdapter;
 use ILIAS\Authentication\Login\Port\Lockout\RecordFailedLoginAttempts;
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Authentication\Login\UserId;
 use ILIAS\User\Profile\Profile;
 
@@ -74,18 +74,18 @@ class ilAuthFrontend implements ilAuthFrontendInterface
 
         $this->login_subject_factory = new LoginSubjectFactory($DIC->database());
 
-        $user_adapter = new UserAdapter($DIC->database());
+        $user_auth_data_repository = new UserAuthDataRepository($DIC->database());
 
         $this->record_failed_login_attempts = new RecordFailedLoginAttempts(
             $security_adapter,  // LoginAttemptLimit
-            $user_adapter,      // LoginAttemptRepository
-            $user_adapter       // AccountDeactivation
+            $user_auth_data_repository,      // LoginAttemptRepository
+            $user_auth_data_repository       // AccountDeactivation
         );
 
         $this->complete_successful_login = new CompleteSuccessfulLogin(
-            $user_adapter,      // LoginAttemptRepository
-            $user_adapter,      // LoginTimestampsRepository
-            $user_adapter,      // PasswordChangeTrackingRepository
+            $user_auth_data_repository,      // LoginAttemptRepository
+            $user_auth_data_repository,      // LoginTimestampsRepository
+            $user_auth_data_repository,      // PasswordChangeTrackingRepository
             $security_adapter   // PasswordChangeOnFirstLoginSettings
         );
 
