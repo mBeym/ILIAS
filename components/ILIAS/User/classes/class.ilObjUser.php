@@ -72,7 +72,6 @@ class ilObjUser extends ilObject
     private ?string $auth_mode = null; // authentication mode
     private int $last_password_change_ts = 0;
     private bool $passwd_policy_reset = false;
-    private int $login_attempts = 0;
     /** @var array<string, string> */
     private array $user_settings = [];
     private static array $personal_image_cache = [];
@@ -221,7 +220,6 @@ class ilObjUser extends ilObject
         $this->password_salt = $data['passwd_salt'];
         $this->password_encoding_type = $data['passwd_enc_type'];
         $this->last_password_change_ts = $data['last_password_change'];
-        $this->login_attempts = $data['login_attempts'];
         $this->passwd_policy_reset = $data['passwd_policy_reset'];
         $this->client_ip = $data['client_ip'];
         $this->last_login = $data['last_login'];
@@ -251,7 +249,6 @@ class ilObjUser extends ilObject
     {
         return [
             'last_password_change' => $this->last_password_change_ts,
-            'login_attempts' => $this->login_attempts,
             'passwd' => $this->prepareAndRetrievePasswordForStorage(),
             'passwd_salt' => $this->password_salt,
             'passwd_enc_type' => $this->password_encoding_type,
@@ -1127,16 +1124,6 @@ class ilObjUser extends ilObject
     public function getTimeLimitUnlimited(): bool
     {
         return $this->time_limit_unlimited;
-    }
-
-    public function setLoginAttempts(int $a_login_attempts): void
-    {
-        $this->login_attempts = $a_login_attempts;
-    }
-
-    public function getLoginAttempts(): int
-    {
-        return $this->login_attempts;
     }
 
     public function checkTimeLimit(): bool
@@ -2146,29 +2133,20 @@ class ilObjUser extends ilObject
     public static function _getLoginAttempts(
         int $a_usr_id
     ): int {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
+        /** @var UserAuthDataRepository $user_auth_data_repo */
+        $user_auth_data_repo = LocalDIC::dic()[UserAuthDataRepository::class];
 
-        $query = 'SELECT login_attempts FROM usr_data WHERE usr_id = %s';
-        $result = $ilDB->queryF($query, ['integer'], [$a_usr_id]);
-        $record = $ilDB->fetchAssoc($result);
-        return (int) ($record['login_attempts'] ?? 0);
+        return $user_auth_data_repo->getCount(new UserId($a_usr_id));
     }
 
     public static function _incrementLoginAttempts(
         int $a_usr_id
     ): bool {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
+        /** @var UserAuthDataRepository $user_auth_data_repo */
+        $user_auth_data_repo = LocalDIC::dic()[UserAuthDataRepository::class];
 
-        $query = 'UPDATE usr_data SET login_attempts = (login_attempts + 1) WHERE usr_id = %s';
-        $affected = $ilDB->manipulateF($query, ['integer'], [$a_usr_id]);
-
-        if ($affected) {
-            return true;
-        } else {
-            return false;
-        }
+        $user_auth_data_repo->increment(new UserId($a_usr_id));
+        return true;
     }
 
     public static function _setUserInactive(

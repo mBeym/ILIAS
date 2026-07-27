@@ -362,7 +362,6 @@ class DatabaseDataRepository implements DataRepository
             )
         ))->withSystemInformation([
             'last_password_change' => $base_data->last_password_change,
-            'login_attempts' => $base_data->login_attempts,
             'passwd' => $base_data->passwd,
             'passwd_salt' => $base_data->passwd_salt,
             'passwd_enc_type' => $base_data->passwd_enc_type,
