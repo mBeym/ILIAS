@@ -112,12 +112,12 @@ class UserAuthDataMigration implements Migration
             );
         }
 
-        /*
+
         if ($this->getRemainingAmountOfSteps() === 0) {
             foreach (['last_login', 'login_attempts', 'last_password_change'] as $column) {
                 $this->db->dropTableColumn('usr_data', $column);
             }
-        }*/
+        }
     }
 
 
