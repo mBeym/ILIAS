@@ -37,14 +37,14 @@ final readonly class CompleteSuccessfulLogin
 
     public function execute(LoginSubject $subject): void
     {
-        if ($this->first_login_policy->isEnabled() && $subject->lastLogin() === '') {
+        if ($this->first_login_policy->isEnabled() && $subject->getUserAuthData()->getLastLogin() === null) {
             $this->password_changes->resetLastChange($subject->userId());
         }
 
-        if ($subject->loginAttempts() > 0) {
+        if ($subject->getUserAuthData()->getLoginAttempts() > 0) {
             $this->attempts->reset($subject->userId());
         }
 
-        $this->timestamps->refreshLogin($subject->userId());
+        $this->timestamps->refreshLogin($subject->getUserAuthData());
     }
 }

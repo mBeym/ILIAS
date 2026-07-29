@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Language\Language;
 use ILIAS\Refinery\ConstraintViolationException;
 use ILIAS\Cron\Job\Schedule\JobScheduleType;
@@ -36,6 +37,7 @@ class ilCronDeleteNeverLoggedInUserAccounts extends \ILIAS\Cron\CronJob
     private \ILIAS\HTTP\GlobalHttpState $http;
     private \ILIAS\Refinery\Factory $refinery;
     private \ilGlobalTemplateInterface $main_tpl;
+    private UserAuthDataRepository $user_auth_data_repo;
 
     public function __construct()
     {
@@ -76,6 +78,10 @@ class ilCronDeleteNeverLoggedInUserAccounts extends \ILIAS\Cron\CronJob
 
             if (isset($DIC['refinery'])) {
                 $this->refinery = $DIC->refinery();
+            }
+
+            if (isset($DIC['ilDB'])) {
+                $this->user_auth_data_repo = new UserAuthDataRepository($DIC->database());
             }
         }
     }
@@ -133,19 +139,16 @@ class ilCronDeleteNeverLoggedInUserAccounts extends \ILIAS\Cron\CronJob
         $status = JobResult::STATUS_NO_ACTION;
         $message = 'No user deleted';
 
-        $userIds = ilObjUser::getUserIdsNeverLoggedIn(
-            $this->thresholdInDays ?: self::DEFAULT_CREATION_THRESHOLD
-        );
-
         $roleIdWhitelist = array_filter(array_map('intval', explode(',', $this->roleIdWhiteliste)));
 
         $counter = 0;
-        foreach ($userIds as $userId) {
-            if ($userId === ANONYMOUS_USER_ID || $userId === SYSTEM_USER_ID) {
+        foreach ($this->user_auth_data_repo->getByNeverLoggedIn($this->thresholdInDays ?: self::DEFAULT_CREATION_THRESHOLD) as $user_auth_data) {
+            $user_id = $user_auth_data->getUserId()->value();
+            if (in_array($user_id, [ANONYMOUS_USER_ID, SYSTEM_USER_ID], true)) {
                 continue;
             }
 
-            $user = ilObjectFactory::getInstanceByObjId($userId, false);
+            $user = ilObjectFactory::getInstanceByObjId($user_id, false);
             if (!($user instanceof ilObjUser)) {
                 continue;
             }
@@ -153,7 +156,7 @@ class ilCronDeleteNeverLoggedInUserAccounts extends \ILIAS\Cron\CronJob
             $ignoreUser = true;
 
             if (count($roleIdWhitelist) > 0) {
-                $assignedRoleIds = array_filter(array_map('intval', $this->rbacreview->assignedRoles($userId)));
+                $assignedRoleIds = array_filter(array_map('intval', $this->rbacreview->assignedRoles($user_id)));
 
                 $respectedRolesToInclude = array_intersect($assignedRoleIds, $roleIdWhitelist);
                 if (count($respectedRolesToInclude) > 0) {

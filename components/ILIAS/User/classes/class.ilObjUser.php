@@ -60,7 +60,6 @@ class ilObjUser extends ilObject
     private ?int $time_limit_until = null;
     private ?int $time_limit_from = null;
     private int $time_limit_owner = 7;
-    private string $last_login = '';
     private string $passwd = '';
     private string $passwd_type = '';
     private ?string $password_encoding_type = null;
@@ -222,7 +221,6 @@ class ilObjUser extends ilObject
         $this->last_password_change_ts = $data['last_password_change'];
         $this->passwd_policy_reset = $data['passwd_policy_reset'];
         $this->client_ip = $data['client_ip'];
-        $this->last_login = $data['last_login'];
         $this->first_login = $data['first_login'];
         $this->last_profile_prompt = $data['last_profile_prompt'];
         $this->last_update = $data['last_update'];
@@ -254,7 +252,6 @@ class ilObjUser extends ilObject
             'passwd_enc_type' => $this->password_encoding_type,
             'passwd_policy_reset' => $this->passwd_policy_reset,
             'client_ip' => $this->client_ip,
-            'last_login' => $this->last_login,
             'first_login' => $this->first_login,
             'last_profile_prompt' => $this->last_profile_prompt,
             'active' => $this->active,
@@ -959,31 +956,6 @@ class ilObjUser extends ilObject
     public function setCurrentLanguage(string $language): void
     {
         ilSession::set('lang', $language);
-    }
-
-    public function setLastLogin(string $a_str): void
-    {
-        $this->last_login = $a_str;
-    }
-
-    public function getLastLogin(): string
-    {
-        return $this->last_login;
-    }
-
-    public function refreshLogin(): void
-    {
-        $this->last_login = $this->db->now();
-
-        $old_first_login = $this->first_login;
-        if ($old_first_login === '') {
-            $this->first_login = $this->db->now();
-            $this->app_event_handler->raise(
-                'components/ILIAS/User',
-                'firstLogin',
-                ['user_obj' => $this]
-            );
-        }
     }
 
     public function setFirstLogin(string $date): void
@@ -2201,14 +2173,16 @@ class ilObjUser extends ilObject
 
         $r = $ilDB->queryF(
             $q = "
-			SELECT COUNT(user_id) num, user_id, firstname, lastname, title, login, last_login, MAX(ctime) ctime, context, agree_date
+			SELECT COUNT(user_id) num, user_id, firstname, lastname, title, login, auth_data.last_login, MAX(ctime) ctime, context, agree_date
 			FROM usr_session
 			LEFT JOIN usr_data u
 				ON user_id = u.usr_id
 			LEFT JOIN usr_pref p
 				ON (p.usr_id = u.usr_id AND p.keyword = %s)
+			LEFT JOIN usr_auth_data auth_data
+			    ON auth_data.usr_id = u.usr_id
             {$where}
-			GROUP BY user_id, firstname, lastname, title, login, last_login, context, agree_date
+			GROUP BY user_id, firstname, lastname, title, login, auth_data.last_login, context, agree_date
 			ORDER BY lastname, firstname
 			",
             ['text'],
@@ -2233,56 +2207,6 @@ class ilObjUser extends ilObject
         );
 
         return $users;
-    }
-
-    public static function getUserIdsByInactivityPeriod(
-        int $periodInDays
-    ): array {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
-
-        if ($periodInDays < 1) {
-            throw new ilException('Invalid period given');
-        }
-
-        $date = date('Y-m-d H:i:s', (time() - ($periodInDays * 24 * 60 * 60)));
-
-        $query = 'SELECT usr_id FROM usr_data WHERE last_login IS NOT NULL AND last_login < %s';
-
-        $ids = [];
-
-        $types = ['timestamp'];
-        $values = [$date];
-
-        $res = $ilDB->queryF($query, $types, $values);
-        while ($row = $ilDB->fetchAssoc($res)) {
-            $ids[] = (int) $row['usr_id'];
-        }
-
-        return $ids;
-    }
-
-    public static function getUserIdsNeverLoggedIn(
-        int $thresholdInDays
-    ): array {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
-
-        $date = date('Y-m-d H:i:s', (time() - ($thresholdInDays * 24 * 60 * 60)));
-
-        $query = 'SELECT usr_id FROM usr_data WHERE last_login IS NULL AND create_date < %s';
-
-        $ids = [];
-
-        $types = ['timestamp'];
-        $values = [$date];
-
-        $res = $ilDB->queryF($query, $types, $values);
-        while ($row = $ilDB->fetchAssoc($res)) {
-            $ids[] = (int) $row['usr_id'];
-        }
-
-        return $ids;
     }
 
     public static function _getUserIdsByInactivationPeriod(
@@ -2841,11 +2765,6 @@ class ilObjUser extends ilObject
         }
 
         return $ids;
-    }
-
-    public static function _lookupLastLogin(int $a_user_id): string
-    {
-        return self::_lookup($a_user_id, 'last_login') ?? '';
     }
 
     public static function _lookupFirstLogin(int $a_user_id): string

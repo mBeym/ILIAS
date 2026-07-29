@@ -20,17 +20,37 @@ declare(strict_types=1);
 
 namespace ILIAS\Authentication\Login;
 
+use ilDBConstants;
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
+
 final readonly class LoginSubjectFactory
 {
+    private UserAuthDataRepository $user_auth_data_repo;
+
     public function __construct(
         private \ilDBInterface $db
-    ){ }
+    ){
+        $this->user_auth_data_repo = new UserAuthDataRepository($this->db);
+    }
 
     public function forUserId(UserId $user_id): LoginSubject
     {
-        $query = 'SELECT active, login_attempts, client_ip, time_limit_unlimited, time_limit_from, time_limit_until, last_login 
-                  FROM usr_data WHERE usr_id = %s';
-        $result = $this->db->queryF($query, ['integer'], [$user_id->value()]);
+        $select_fields = [
+            'active',
+            'client_ip',
+            'time_limit_unlimited',
+            'time_limit_from',
+            'time_limit_until',
+            'auth_data.*',
+        ];
+
+        $result = $this->db->queryF(
+            'SELECT ' . implode(', ', $select_fields) . ' FROM usr_data'
+            . ' LEFT JOIN ' . UserAuthDataRepository::USER_AUTH_DATA_TABLE_NAME . ' auth_data ON auth_data.usr_id = usr_data.usr_id'
+            . ' WHERE usr_data.usr_id = %s',
+            [ilDBConstants::T_INTEGER],
+            [$user_id->value()]
+        );
         $record = $this->db->fetchAssoc($result);
 
         if (!$record) {
@@ -40,13 +60,12 @@ final readonly class LoginSubjectFactory
         return new LoginSubject(
             $user_id,
             (bool) $record['active'],
-            (int) $record['login_attempts'],
             (string) ($record['client_ip'] ?? ''),
             (bool) $record['time_limit_unlimited'],
             (int) $record['time_limit_from'],
             (int) $record['time_limit_until'],
-            (string) ($record['last_login'] ?? ''),
-            session_id()
+            session_id(),
+            $this->user_auth_data_repo->map($record)
         );
     }
 }

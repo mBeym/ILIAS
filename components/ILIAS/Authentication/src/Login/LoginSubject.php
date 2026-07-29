@@ -20,18 +20,19 @@ declare(strict_types=1);
 
 namespace ILIAS\Authentication\Login;
 
+use ILIAS\Authentication\Login\Model\UserAuthData;
+
 final readonly class LoginSubject
 {
     public function __construct(
         private UserId $user_id,
         private bool $active,
-        private int $login_attempts,
         private string $client_ip_pattern,
         private bool $unlimited_account,
         private int $valid_from,
         private int $expires_at,
-        private string $last_login,
-        private string $current_session_id
+        private string $current_session_id,
+        private UserAuthData $user_auth_data
     ) {
     }
 
@@ -43,11 +44,6 @@ final readonly class LoginSubject
     public function isActive(): bool
     {
         return $this->active;
-    }
-
-    public function loginAttempts(): int
-    {
-        return $this->login_attempts;
     }
 
     public function clientIpPattern(): string
@@ -70,13 +66,13 @@ final readonly class LoginSubject
         return $this->expires_at;
     }
 
-    public function lastLogin(): string
-    {
-        return $this->last_login;
-    }
-
     public function currentSessionId(): string
     {
         return $this->current_session_id;
+    }
+
+    public function getUserAuthData(): UserAuthData
+    {
+        return $this->user_auth_data;
     }
 }

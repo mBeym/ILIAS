@@ -24,6 +24,7 @@ namespace ILIAS\Authentication\Login\Repository;
 use DateTime;
 use ilDBConstants;
 use ilDBInterface;
+use ilException;
 use ILIAS\Authentication\Login\Model\UserAuthData;
 use ILIAS\Authentication\Login\Port\Account\LoginTimestampsRepository;
 use ILIAS\Authentication\Login\Port\Lockout\AccountDeactivation;
@@ -54,6 +55,30 @@ class UserAuthDataRepository implements
         return $row ? $this->map($row) : new UserAuthData($user_id);
     }
 
+    /**
+     * @param list<UserId> $ids
+     * @return list<UserAuthData>
+     */
+    public function getForIds(array $ids): array
+    {
+        $result = $this->db->query(
+            'SELECT * FROM ' . self::USER_AUTH_DATA_TABLE_NAME
+            . ' WHERE ' . $this->db->in(
+                'usr_id',
+                array_map(static fn(UserId $user_id): int => $user_id->value(), $ids),
+                false,
+                ilDBConstants::T_INTEGER
+            ),
+        );
+
+        $data = [];
+
+        while ($row = $this->db->fetchAssoc($result)) {
+            $data[] = $this->map($row);
+        }
+        return $data;
+    }
+
     public function store(UserAuthData $user_auth_data): void
     {
         if ($this->existsFor($user_auth_data->getUserId())) {
@@ -79,6 +104,57 @@ class UserAuthDataRepository implements
                 ]
             );
         }
+    }
+
+    /**
+     * @return list<UserAuthData>
+     * @throws ilException
+     */
+    public function getByInactivityPeriod(int $period_in_days): array
+    {
+        if ($period_in_days < 1) {
+            throw new ilException('Invalid period given');
+        }
+
+        $timestamp = (time() - ($period_in_days * 24 * 60 * 60));
+
+        $result = $this->db->queryF(
+            'SELECT * FROM ' . self::USER_AUTH_DATA_TABLE_NAME . ' WHERE last_login IS NOT NULL AND last_login < %s',
+            [ilDBConstants::T_INTEGER],
+            [$timestamp]
+        );
+
+        $data = [];
+
+        while ($row = $this->db->fetchAssoc($result)) {
+            $data[] = $this->map($row);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return list<UserAuthData>
+     */
+    public function getByNeverLoggedIn(int $threshold_in_days): array
+    {
+        $timestamp = (time() - ($threshold_in_days * 24 * 60 * 60));
+
+        $result = $this->db->queryF(
+            'SELECT auth_data.* FROM ' . self::USER_AUTH_DATA_TABLE_NAME . ' auth_data'
+            . ' INNER JOIN usr_data ON usr_data.usr_id = auth_data.usr_id AND create_date < %s'
+            . ' WHERE auth_data.last_login IS NULL',
+            [ilDBConstants::T_INTEGER],
+            [$timestamp]
+        );
+
+        $data = [];
+
+        while ($row = $this->db->fetchAssoc($result)) {
+            $data[] = $this->map($row);
+        }
+
+        return $data;
     }
 
     public function getCount(UserId $user_id): int
@@ -108,13 +184,16 @@ class UserAuthDataRepository implements
         );
     }
 
-    public function refreshLogin(UserId $user_id): void
+    public function refreshLogin(UserAuthData $user_auth_data): void
     {
+        $last_login = time();
         $this->db->manipulateF(
             'UPDATE ' . self::USER_AUTH_DATA_TABLE_NAME . ' SET last_login = %s WHERE usr_id = %s',
             [ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER],
-            [time(), $user_id->value()]
+            [$last_login, $user_auth_data->getUserId()->value()]
         );
+
+        $user_auth_data->setLastLogin(new DateTime()->setTimestamp($last_login));
     }
 
     public function resetLastChange(UserId $user_id): void
@@ -146,7 +225,7 @@ class UserAuthDataRepository implements
         return (bool) ($this->db->fetchAssoc($result)['does_exist'] ?? false);
     }
 
-    private function map(array $row): UserAuthData
+    public function map(array $row): UserAuthData
     {
         $last_login = $row['last_login'];
         $last_password_change = $row['last_password_change'];

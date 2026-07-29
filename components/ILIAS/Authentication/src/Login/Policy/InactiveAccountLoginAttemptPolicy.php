@@ -42,7 +42,7 @@ final readonly class InactiveAccountLoginAttemptPolicy implements PostLoginPolic
             return new Result\Ok(null);
         }
 
-        if ($subject->loginAttempts() < $max) {
+        if ($subject->getUserAuthData()->getLoginAttempts() < $max) {
             return new Result\Ok(null);
         }
 

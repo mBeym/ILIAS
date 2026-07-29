@@ -18,6 +18,8 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\UserId;
+
 /**
  * OAuth based lti authentication
  * @author Stefan Meyer <smeyer.ilias@gmx.de>
@@ -406,7 +408,18 @@ class ilAuthProviderLTI extends \ilAuthProvider implements \ilAuthProviderInterf
             $user_obj->setTimeLimitFrom(time() - 60);
             $user_obj->setTimeLimitUntil(time() + (int) $ilClientIniFile->readVariable("session", "expire"));
         }
-        $user_obj->refreshLogin();
+
+        global $DIC;
+        $this->getUserAuthDataRepo()->refreshLogin($user_obj->getUserAuthData());
+        if ($user_obj->getFirstLogin() === '') {
+            $user_obj->setFirstLogin($DIC->database()->now());
+            $DIC->event()->raise(
+                'components/ILIAS/User',
+                'firstLogin',
+                ['user_obj' => $this]
+            );
+        }
+
         $user_obj->update();
 
         $GLOBALS['DIC']->rbac()->admin()->assignUser($consumer->getRole(), $user_obj->getId());

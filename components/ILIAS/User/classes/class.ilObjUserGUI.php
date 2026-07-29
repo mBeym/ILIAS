@@ -762,8 +762,8 @@ class ilObjUserGUI extends ilObjectGUI
         yield $this->buildNonEditableInput(
             'last_login',
             ilDatePresentation::formatDate(new ilDateTime(
-                $user->getLastLogin(),
-                IL_CAL_DATETIME
+                $user->getUserAuthData()->getLastLoginTimestamp(),
+                IL_CAL_UNIX
             ))
         );
 

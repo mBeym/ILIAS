@@ -948,14 +948,14 @@ class ilObjUserFolderGUI extends ilObjectGUI
         foreach ($user_ids as $id) {
             $user = new ilObjUser((int) $id);
 
-            $login = $user->getLastLogin();
+            $login = $user->getUserAuthData()->getLastLogin();
             if (!$login) {
                 $login = $this->lng->txt('never');
             } else {
                 $login = ilDatePresentation::formatDate(
                     new ilDateTime(
-                        $login,
-                        IL_CAL_DATETIME
+                        $login->getTimestamp(),
+                        IL_CAL_UNIX
                     )
                 );
             }

@@ -408,7 +408,18 @@ class ilAuthProviderECS extends ilAuthProvider
             $user_obj->setTimeLimitFrom(time() - 60);
             $user_obj->setTimeLimitUntil(time() + (int) $this->clientIniFile->readVariable("session", "expire"));
         }
-        $user_obj->refreshLogin();
+
+        global $DIC;
+        $this->getUserAuthDataRepo()->refreshLogin($user_obj->getUserAuthData());
+        if ($user_obj->getFirstLogin() === '') {
+            $user_obj->setFirstLogin($DIC->database()->now());
+            $DIC->event()->raise(
+                'components/ILIAS/User',
+                'firstLogin',
+                ['user_obj' => $this]
+            );
+        }
+
         $user_obj->update();
 
         if ($this->getCurrentServer()->getGlobalRole()) {

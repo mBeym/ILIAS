@@ -142,7 +142,7 @@ class ilUserLPTableGUI extends ilTable2GUI
         );
         $this->tpl->setVariable(
             "VAL_LAST_LOGIN",
-            ilDatePresentation::formatDate(new ilDateTime($a_set["last_login"], IL_CAL_DATETIME))
+            ilDatePresentation::formatDate(new ilDateTime($a_set["last_login"], IL_CAL_UNIX))
         );
     }
 
@@ -156,7 +156,7 @@ class ilUserLPTableGUI extends ilTable2GUI
             3,
             self::secondsToShortString($a_set["online_time"])
         );
-        $a_excel->setCell($a_row, 4, new ilDateTime($a_set["last_login"], IL_CAL_DATETIME));
+        $a_excel->setCell($a_row, 4, new ilDateTime($a_set["last_login"], IL_CAL_UNIX));
     }
 
     /**
