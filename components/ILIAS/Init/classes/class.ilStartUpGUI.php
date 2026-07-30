@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Registration\DualOptIn\Exception\DualOptInException;
 use ILIAS\Registration\DualOptIn\Repository\PendingRegistrationDatabaseRepository;
 use ILIAS\Registration\DualOptIn\Service\DualOptInServiceImpl;
@@ -1533,6 +1534,7 @@ class ilStartUpGUI implements ilCtrlBaseClassInterface, ilCtrlSecurityInterface
             $dual_opt_in_service = new DualOptInServiceImpl(
                 new ilRegistrationSettings(),
                 new PendingRegistrationDatabaseRepository($this->dic->database()),
+                new UserAuthDataRepository($this->dic->database()),
                 $this->dic->database(),
                 $this->dic->logger()->user(),
                 (new \ILIAS\Data\Factory())->clock()

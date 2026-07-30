@@ -20,9 +20,11 @@ declare(strict_types=1);
 
 namespace ILIAS\Authentication\Login\Port\Password;
 
-use ILIAS\Authentication\Login\UserId;
+use ILIAS\Authentication\Login\Model\UserAuthData;
 
 interface PasswordChangeTrackingRepository
 {
-    public function resetLastChange(UserId $user_id): void;
+    public function resetLastChange(UserAuthData $user_auth_data): void;
+
+    public function setLastChangeToNow(UserAuthData $user_auth_data): void;
 }

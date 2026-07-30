@@ -38,7 +38,7 @@ final readonly class CompleteSuccessfulLogin
     public function execute(LoginSubject $subject): void
     {
         if ($this->first_login_policy->isEnabled() && $subject->getUserAuthData()->getLastLogin() === null) {
-            $this->password_changes->resetLastChange($subject->userId());
+            $this->password_changes->resetLastChange($subject->getUserAuthData());
         }
 
         if ($subject->getUserAuthData()->getLoginAttempts() > 0) {

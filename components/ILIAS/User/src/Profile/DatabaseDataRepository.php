@@ -144,7 +144,6 @@ class DatabaseDataRepository implements DataRepository
                 'latitude' => [\ilDBConstants::T_TEXT, $user_data->getGeoCoordinates()['latitude'] ?? null],
                 'longitude' => [\ilDBConstants::T_TEXT, $user_data->getGeoCoordinates()['longitude'] ?? null],
                 'loc_zoom' => [\ilDBConstants::T_INTEGER, $user_data->getGeoCoordinates()['zoom'] ?? 0],
-                'last_password_change' => [\ilDBConstants::T_INTEGER, $system_information['last_password_change']],
                 'passwd' => [\ilDBConstants::T_TEXT, $system_information['passwd']],
                 'passwd_salt' => [\ilDBConstants::T_TEXT, $system_information['passwd_salt']],
                 'passwd_enc_type' => [\ilDBConstants::T_TEXT, $system_information['passwd_enc_type']],
@@ -357,7 +356,6 @@ class DatabaseDataRepository implements DataRepository
                 []
             )
         ))->withSystemInformation([
-            'last_password_change' => $base_data->last_password_change,
             'passwd' => $base_data->passwd,
             'passwd_salt' => $base_data->passwd_salt,
             'passwd_enc_type' => $base_data->passwd_enc_type,

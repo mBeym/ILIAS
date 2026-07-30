@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Data\Password;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\UI\Renderer as UIRenderer;
@@ -45,6 +46,7 @@ class ilLocalUserPasswordSettingsGUI
     private readonly ilObjUser $user;
     private readonly ilCtrlInterface $ctrl;
     private readonly LocalUserPasswordManager $password_manager;
+    private UserAuthDataRepository $user_auth_data_repo;
 
     public function __construct()
     {
@@ -60,6 +62,8 @@ class ilLocalUserPasswordSettingsGUI
         $this->ui_renderer = $DIC->ui()->renderer();
         $this->password_manager = LocalUserPasswordManager::getInstance();
         $this->lng->loadLanguageModule('user');
+
+        $this->user_auth_data_repo = new UserAuthDataRepository($DIC->database());
     }
 
     public function executeCommand(): void
@@ -91,7 +95,7 @@ class ilLocalUserPasswordSettingsGUI
             );
         } elseif ($this->user->isPasswordExpired()) {
             $msg = $this->lng->txt('password_expired');
-            $password_age = $this->user->getPasswordAgeInDays();
+            $password_age = $this->user->getUserAuthData()->getLastPasswordChangeInDays();
             $this->tpl->setOnScreenMessage($this->tpl::MESSAGE_TYPE_INFO, sprintf($msg, $password_age));
         }
 
@@ -271,7 +275,7 @@ class ilLocalUserPasswordSettingsGUI
 
             $this->user->resetPassword($entered_new_passwd, $entered_new_passwd);
             if ($entered_current_passwd !== $entered_new_passwd) {
-                $this->user->setLastPasswordChangeToNow();
+                $this->user_auth_data_repo->setLastChangeToNow($this->user->getUserAuthData());
                 $this->user->setPasswordPolicyResetStatus(false);
                 $this->user->update();
             }

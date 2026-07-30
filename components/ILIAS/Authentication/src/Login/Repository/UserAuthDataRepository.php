@@ -196,12 +196,25 @@ class UserAuthDataRepository implements
         $user_auth_data->setLastLogin(new DateTime()->setTimestamp($last_login));
     }
 
-    public function resetLastChange(UserId $user_id): void
+    public function resetLastChange(UserAuthData $user_auth_data): void
     {
         $this->db->manipulateF(
             'UPDATE ' . self::USER_AUTH_DATA_TABLE_NAME . ' SET last_password_change = 0 WHERE usr_id = %s',
             [ilDBConstants::T_INTEGER],
-            [$user_id->value()]
+            [$user_auth_data->getUserId()->value()]
+        );
+
+        $user_auth_data->setLastPasswordChange(null);
+    }
+
+    public function setLastChangeToNow(UserAuthData $user_auth_data): void
+    {
+        $user_auth_data->setLastPasswordChange(new DateTime()->setTimestamp(time()));
+
+        $this->db->manipulateF(
+            'UPDATE ' . self::USER_AUTH_DATA_TABLE_NAME . ' SET last_password_change = %s WHERE usr_id = %s',
+            [ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER],
+            [$user_auth_data->getLastPasswordChangeTimestamp(), $user_auth_data->getUserId()->value()]
         );
     }
 

@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\User\LocalDIC;
 use ILIAS\User\UserGUIRequest;
 use ILIAS\User\Context;
@@ -67,6 +68,7 @@ class ilObjUserGUI extends ilObjectGUI
     private int $usrf_ref_id;
     private Context $context;
     private Conductor $legal_documents;
+    private UserAuthDataRepository $user_auth_data_repo;
 
     public function __construct(
         $a_data,
@@ -115,6 +117,8 @@ class ilObjUserGUI extends ilObjectGUI
         $this->legal_documents = $DIC['legalDocuments'];
 
         $this->lng->loadLanguageModule('crs');
+
+        $this->user_auth_data_repo = new UserAuthDataRepository($DIC->database());
     }
 
     public function executeCommand(): void
@@ -368,7 +372,8 @@ class ilObjUserGUI extends ilObjectGUI
         if (ilAuthUtils::_isExternalAccountEnabled()) {
             $user_object->setExternalAccount($this->form_gui->getInput('ext_account'));
         }
-        $user_object->setLastPasswordChangeTS(time());
+
+        $this->user_auth_data_repo->setLastChangeToNow($user_object->getUserAuthData());
 
         $user_object->setTitle($user_object->getFullname());
         $user_object->setDescription($user_object->getEmail());
@@ -483,7 +488,7 @@ class ilObjUserGUI extends ilObjectGUI
             $this->addValuesFromSystemInformationToUserSection($this->object, false)
         );
 
-        $this->object->setLastPasswordChangeTS(time());
+        $this->user_auth_data_repo->setLastChangeToNow($this->object->getUserAuthData());
         $this->object->setProfileIncomplete(false);
 
         // If the current user is editing its own user account,

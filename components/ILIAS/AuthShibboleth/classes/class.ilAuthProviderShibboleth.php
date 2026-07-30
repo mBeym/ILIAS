@@ -104,6 +104,8 @@ class ilAuthProviderShibboleth extends ilAuthProvider
                 $status->setReason('err_disabled');
             }
 
+            $this->getUserAuthDataRepo()->store($shib_user->getUserAuthData());
+
         } else {
             $this->getLogger()->info('Shibboleth authentication failed.');
             $this->handleAuthenticationFail($status, 'err_wrong_login');

@@ -77,6 +77,11 @@ class UserAuthData
         return $this->getLastPasswordChange() !== null ? $this->getLastPasswordChange()->getTimestamp() : 0;
     }
 
+    public function getLastPasswordChangeInDays(): int
+    {
+        return (int) floor((time() - $this->getLastPasswordChangeTimestamp()) / 86400);
+    }
+
     public function setLastPasswordChange(?DateTime $last_password_change): self
     {
         $this->last_password_change = $last_password_change;

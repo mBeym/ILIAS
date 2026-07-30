@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace ILIAS\Registration\DualOptIn\Service;
 
+use DateTime;
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Data\Clock\ClockFactory;
 use ILIAS\Data\ObjectId;
 use ILIAS\Registration\DualOptIn\Entity\PendingRegistration;
@@ -38,6 +40,7 @@ final readonly class DualOptInServiceImpl implements DualOptInService
     public function __construct(
         private \ilRegistrationSettings $settings,
         private PendingRegistrationRepository $pending_reg_repository,
+        private UserAuthDataRepository $user_auth_data_repo,
         private \ilDBInterface $db,
         private \ilComponentLogger $logger,
         private ClockFactory $clock_factory
@@ -190,7 +193,10 @@ final readonly class DualOptInServiceImpl implements DualOptInService
         if ($this->settings->passwordGenerationEnabled()) {
             $password = \ilSecuritySettingsChecker::generatePasswords(1)[0];
             $user->setPasswd($password, \ilObjUser::PASSWD_PLAIN);
-            $user->setLastPasswordChangeTS($this->clock_factory->utc()->now()->getTimestamp());
+            $this->user_auth_data_repo->store(
+                $user->getUserAuthData()->setLastPasswordChange(new DateTime()->setTimestamp($this->clock_factory->utc()->now()->getTimestamp()))
+            );
+
         }
 
         $user->update();

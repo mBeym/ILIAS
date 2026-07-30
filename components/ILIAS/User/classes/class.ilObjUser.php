@@ -69,7 +69,6 @@ class ilObjUser extends ilObject
     private int $active = 0;
     private string $client_ip = ''; // client ip to check before login
     private ?string $auth_mode = null; // authentication mode
-    private int $last_password_change_ts = 0;
     private bool $passwd_policy_reset = false;
     /** @var array<string, string> */
     private array $user_settings = [];
@@ -218,7 +217,6 @@ class ilObjUser extends ilObject
 
         $this->password_salt = $data['passwd_salt'];
         $this->password_encoding_type = $data['passwd_enc_type'];
-        $this->last_password_change_ts = $data['last_password_change'];
         $this->passwd_policy_reset = $data['passwd_policy_reset'];
         $this->client_ip = $data['client_ip'];
         $this->first_login = $data['first_login'];
@@ -246,7 +244,6 @@ class ilObjUser extends ilObject
     private function buildSystemInformationArrayForDB(): array
     {
         return [
-            'last_password_change' => $this->last_password_change_ts,
             'passwd' => $this->prepareAndRetrievePasswordForStorage(),
             'passwd_salt' => $this->password_salt,
             'passwd_enc_type' => $this->password_encoding_type,
@@ -922,16 +919,6 @@ class ilObjUser extends ilObject
         return $this->passwd_type;
     }
 
-    public function setLastPasswordChangeTS(int $a_last_password_change_ts): void
-    {
-        $this->last_password_change_ts = $a_last_password_change_ts;
-    }
-
-    public function getLastPasswordChangeTS(): int
-    {
-        return $this->last_password_change_ts;
-    }
-
     public function getPasswordPolicyResetStatus(): bool
     {
         return $this->passwd_policy_reset;
@@ -1140,14 +1127,14 @@ class ilObjUser extends ilObject
         return !ilAuthUtils::_needsExternalAccountByAuthMode($this->getAuthMode(true))
             && ($this->getPasswordPolicyResetStatus()
                 || ilSecuritySettings::_getInstance()->isPasswordChangeOnFirstLoginEnabled()
-                    && $this->getLastPasswordChangeTS() === 0
+                    && $this->getUserAuthData()->getLastPasswordChangeTimestamp() === 0
                     && $this->is_self_registered === false);
     }
 
     public function isPasswordExpired(): bool
     {
         if ($this->id === ANONYMOUS_USER_ID
-            || $this->getLastPasswordChangeTS() === 0) {
+            || $this->getUserAuthData()->getLastPasswordChangeTimestamp() === 0) {
             return false;
         }
 
@@ -1156,27 +1143,12 @@ class ilObjUser extends ilObject
             return false;
         }
 
-        if (time() - $this->getLastPasswordChangeTS() > $max_pass_age_in_seconds
+        if (time() - $this->getUserAuthData()->getLastPasswordChangeTimestamp() > $max_pass_age_in_seconds
             && !ilAuthUtils::_needsExternalAccountByAuthMode($this->getAuthMode(true))) {
             return true;
         }
 
         return false;
-    }
-
-    public function getPasswordAgeInDays(): int
-    {
-        return (int) floor((time() - $this->getLastPasswordChangeTS()) / 86400);
-    }
-
-    public function setLastPasswordChangeToNow(): void
-    {
-        $this->last_password_change_ts = time();
-    }
-
-    public function resetLastPasswordChange(): void
-    {
-        $this->last_password_change_ts = 0;
     }
 
     public function setAuthMode(?string $a_str): void

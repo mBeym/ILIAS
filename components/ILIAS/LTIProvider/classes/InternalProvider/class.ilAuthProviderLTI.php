@@ -535,7 +535,8 @@ class ilAuthProviderLTI extends \ilAuthProvider implements \ilAuthProviderInterf
         $userObj->create();
         $userObj->setActive(true);
         //        $userObj->updateOwner();
-        $userObj->setLastPasswordChangeTS(time());
+
+        $this->getUserAuthDataRepo()->setLastChangeToNow($userObj->getUserAuthData());
         $userObj->saveAsNew();
         $userObj->writePrefs();
 
