@@ -19,6 +19,8 @@
 declare(strict_types=1);
 
 use ILIAS\Authentication\Setup\AbandonCASAuthModeUpdateObjective;
+use ILIAS\Authentication\Setup\AuthenticationDatabaseUpdateSteps;
+use ILIAS\Authentication\Setup\Migration\UserAuthDataMigration;
 use ILIAS\Setup;
 use ILIAS\Refinery;
 
@@ -57,15 +59,18 @@ class ilAuthenticationSetupAgent implements Setup\Agent
 
     public function getUpdateObjective(?Setup\Config $config = null): Setup\Objective
     {
+        $objectives = [];
         if ($config !== null) {
-            return new Setup\ObjectiveCollection(
-                'Authentication',
-                true,
-                new ilSessionMaxIdleIsSetObjective($config)
-            );
+            $objectives[] = new ilSessionMaxIdleIsSetObjective($config);
         }
 
-        return new Setup\Objective\NullObjective();
+        $objectives[] = new ilDatabaseUpdateStepsExecutedObjective(new AuthenticationDatabaseUpdateSteps());
+
+        return new Setup\ObjectiveCollection(
+            'Authentication',
+            true,
+            ...$objectives
+        );
     }
 
     public function getBuildObjective(): Setup\Objective
@@ -80,6 +85,8 @@ class ilAuthenticationSetupAgent implements Setup\Agent
 
     public function getMigrations(): array
     {
-        return [];
+        return [
+            new UserAuthDataMigration()
+        ];
     }
 }

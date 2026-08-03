@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Refinery\Factory as RefineryFactory;
 use ILIAS\HTTP\Services as HTTPServices;
 
@@ -46,6 +47,7 @@ class ilPasswordAssistanceGUI implements ilCtrlSecurityInterface
     private ILIAS\Data\Clock\ClockInterface $clock;
     private ILIAS\Init\PasswordAssitance\PasswordAssistanceRepository $pwa_repository;
     private readonly \ILIAS\Mail\Service\MailSignatureService $signature_service;
+    private UserAuthDataRepository $user_auth_data_repo;
 
     public function __construct()
     {
@@ -70,6 +72,7 @@ class ilPasswordAssistanceGUI implements ilCtrlSecurityInterface
         );
         $this->help->setScreenIdComponent('init');
         $this->signature_service = $DIC->mail()->signature();
+        $this->user_auth_data_repo = new UserAuthDataRepository($DIC->database());
     }
 
     private function retrieveRequestedKey(): string
@@ -659,7 +662,7 @@ class ilPasswordAssistanceGUI implements ilCtrlSecurityInterface
         // If we are successful so far, we update the user object.
         // ------------------
         if ($is_successful) {
-            $userObj->setLastPasswordChangeToNow();
+            $this->user_auth_data_repo->setLastChangeToNow($userObj->getUserAuthData());
             $userObj->update();
         }
 

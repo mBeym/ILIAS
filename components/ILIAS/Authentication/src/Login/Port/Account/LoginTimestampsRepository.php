@@ -20,9 +20,9 @@ declare(strict_types=1);
 
 namespace ILIAS\Authentication\Login\Port\Account;
 
-use ILIAS\Authentication\Login\UserId;
+use ILIAS\Authentication\Login\Model\UserAuthData;
 
 interface LoginTimestampsRepository
 {
-    public function refreshLogin(UserId $user_id): void;
+    public function refreshLogin(UserAuthData $user_auth_data): void;
 }

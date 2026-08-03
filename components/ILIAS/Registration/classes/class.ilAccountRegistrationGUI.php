@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\DI\Container;
 use ILIAS\Registration\DualOptIn\Repository\PendingRegistrationDatabaseRepository;
 use ILIAS\Language\UserSettings\Language as LanguageSetting;
@@ -59,6 +60,7 @@ class ilAccountRegistrationGUI
 
     protected ILIAS\Refinery\Factory $refinery;
     protected \ILIAS\HTTP\Services $http;
+    private UserAuthDataRepository $user_auth_data_repo;
 
     public function __construct()
     {
@@ -91,6 +93,7 @@ class ilAccountRegistrationGUI
 
         $this->http = $DIC->http();
         $this->refinery = $DIC->refinery();
+        $this->user_auth_data_repo = new UserAuthDataRepository($DIC->database());
     }
 
     public function executeCommand(): void
@@ -489,7 +492,7 @@ class ilAccountRegistrationGUI
 
         // set a timestamp for last_password_change
         // this ts is needed by ilSecuritySettings
-        $this->userObj->setLastPasswordChangeTS(time());
+        $this->user_auth_data_repo->setLastChangeToNow($this->userObj->getUserAuthData());
 
         $this->userObj->setIsSelfRegistered(true);
 
@@ -569,6 +572,7 @@ class ilAccountRegistrationGUI
             $dual_opt_in_service = new DualOptInServiceImpl(
                 $this->registration_settings,
                 new PendingRegistrationDatabaseRepository($this->dic->database()),
+                new UserAuthDataRepository($this->dic->database()),
                 $this->dic->database(),
                 $this->dic->logger()->user(),
                 (new \ILIAS\Data\Factory())->clock()

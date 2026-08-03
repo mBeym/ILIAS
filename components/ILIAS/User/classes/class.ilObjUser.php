@@ -16,6 +16,9 @@
  *
  *********************************************************************/
 
+use ILIAS\Authentication\Login\Model\UserAuthData;
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
+use ILIAS\Authentication\Login\UserId;
 use ILIAS\User\LocalDIC;
 use ILIAS\User\Context;
 use ILIAS\User\Profile\Data;
@@ -57,7 +60,6 @@ class ilObjUser extends ilObject
     private ?int $time_limit_until = null;
     private ?int $time_limit_from = null;
     private int $time_limit_owner = 7;
-    private string $last_login = '';
     private string $passwd = '';
     private string $passwd_type = '';
     private ?string $password_encoding_type = null;
@@ -67,9 +69,7 @@ class ilObjUser extends ilObject
     private int $active = 0;
     private string $client_ip = ''; // client ip to check before login
     private ?string $auth_mode = null; // authentication mode
-    private int $last_password_change_ts = 0;
     private bool $passwd_policy_reset = false;
-    private int $login_attempts = 0;
     /** @var array<string, string> */
     private array $user_settings = [];
     private static array $personal_image_cache = [];
@@ -84,6 +84,7 @@ class ilObjUser extends ilObject
     private ProfileDataRepository $profile_data_repository;
     private ProfileConfigurationRepository $profile_configuration_repository;
     private SettingsDataRepository $settings_data_repository;
+    private UserAuthDataRepository $user_auth_data_repository;
 
     private StreamDelivery $delivery;
     private DataFactory $data_factory;
@@ -92,6 +93,7 @@ class ilObjUser extends ilObject
     private ilSetting $ilias_settings;
     private ilAuthSession $auth_session;
     private ilCtrl $ctrl;
+    private UserAuthData $user_auth_data;
 
     public function __construct(
         int $a_user_id = 0,
@@ -114,6 +116,7 @@ class ilObjUser extends ilObject
         $this->profile_data = $this->profile_data_repository->getDefault();
         $this->profile_configuration_repository = $local_dic[ProfileConfigurationRepository::class];
         $this->settings_data_repository = $local_dic[SettingsDataRepository::class];
+        $this->user_auth_data_repository = $local_dic[UserAuthDataRepository::class];
 
         $this->data_factory = (new DataFactory());
 
@@ -148,6 +151,8 @@ class ilObjUser extends ilObject
         $this->assignSystemInformationFromDB($this->profile_data->getSystemInformation());
 
         $this->readSettings();
+
+        $this->user_auth_data = $this->user_auth_data_repository->getFor(new UserId($this->getId()));
 
         parent::read();
     }
@@ -212,11 +217,8 @@ class ilObjUser extends ilObject
 
         $this->password_salt = $data['passwd_salt'];
         $this->password_encoding_type = $data['passwd_enc_type'];
-        $this->last_password_change_ts = $data['last_password_change'];
-        $this->login_attempts = $data['login_attempts'];
         $this->passwd_policy_reset = $data['passwd_policy_reset'];
         $this->client_ip = $data['client_ip'];
-        $this->last_login = $data['last_login'];
         $this->first_login = $data['first_login'];
         $this->last_profile_prompt = $data['last_profile_prompt'];
         $this->last_update = $data['last_update'];
@@ -242,14 +244,11 @@ class ilObjUser extends ilObject
     private function buildSystemInformationArrayForDB(): array
     {
         return [
-            'last_password_change' => $this->last_password_change_ts,
-            'login_attempts' => $this->login_attempts,
             'passwd' => $this->prepareAndRetrievePasswordForStorage(),
             'passwd_salt' => $this->password_salt,
             'passwd_enc_type' => $this->password_encoding_type,
             'passwd_policy_reset' => $this->passwd_policy_reset,
             'client_ip' => $this->client_ip,
-            'last_login' => $this->last_login,
             'first_login' => $this->first_login,
             'last_profile_prompt' => $this->last_profile_prompt,
             'active' => $this->active,
@@ -920,16 +919,6 @@ class ilObjUser extends ilObject
         return $this->passwd_type;
     }
 
-    public function setLastPasswordChangeTS(int $a_last_password_change_ts): void
-    {
-        $this->last_password_change_ts = $a_last_password_change_ts;
-    }
-
-    public function getLastPasswordChangeTS(): int
-    {
-        return $this->last_password_change_ts;
-    }
-
     public function getPasswordPolicyResetStatus(): bool
     {
         return $this->passwd_policy_reset;
@@ -954,31 +943,6 @@ class ilObjUser extends ilObject
     public function setCurrentLanguage(string $language): void
     {
         ilSession::set('lang', $language);
-    }
-
-    public function setLastLogin(string $a_str): void
-    {
-        $this->last_login = $a_str;
-    }
-
-    public function getLastLogin(): string
-    {
-        return $this->last_login;
-    }
-
-    public function refreshLogin(): void
-    {
-        $this->last_login = $this->db->now();
-
-        $old_first_login = $this->first_login;
-        if ($old_first_login === '') {
-            $this->first_login = $this->db->now();
-            $this->app_event_handler->raise(
-                'components/ILIAS/User',
-                'firstLogin',
-                ['user_obj' => $this]
-            );
-        }
     }
 
     public function setFirstLogin(string $date): void
@@ -1121,16 +1085,6 @@ class ilObjUser extends ilObject
         return $this->time_limit_unlimited;
     }
 
-    public function setLoginAttempts(int $a_login_attempts): void
-    {
-        $this->login_attempts = $a_login_attempts;
-    }
-
-    public function getLoginAttempts(): int
-    {
-        return $this->login_attempts;
-    }
-
     public function checkTimeLimit(): bool
     {
         if ($this->getTimeLimitUnlimited()) {
@@ -1173,14 +1127,14 @@ class ilObjUser extends ilObject
         return !ilAuthUtils::_needsExternalAccountByAuthMode($this->getAuthMode(true))
             && ($this->getPasswordPolicyResetStatus()
                 || ilSecuritySettings::_getInstance()->isPasswordChangeOnFirstLoginEnabled()
-                    && $this->getLastPasswordChangeTS() === 0
+                    && $this->getUserAuthData()->getLastPasswordChangeTimestamp() === 0
                     && $this->is_self_registered === false);
     }
 
     public function isPasswordExpired(): bool
     {
         if ($this->id === ANONYMOUS_USER_ID
-            || $this->getLastPasswordChangeTS() === 0) {
+            || $this->getUserAuthData()->getLastPasswordChangeTimestamp() === 0) {
             return false;
         }
 
@@ -1189,27 +1143,12 @@ class ilObjUser extends ilObject
             return false;
         }
 
-        if (time() - $this->getLastPasswordChangeTS() > $max_pass_age_in_seconds
+        if (time() - $this->getUserAuthData()->getLastPasswordChangeTimestamp() > $max_pass_age_in_seconds
             && !ilAuthUtils::_needsExternalAccountByAuthMode($this->getAuthMode(true))) {
             return true;
         }
 
         return false;
-    }
-
-    public function getPasswordAgeInDays(): int
-    {
-        return (int) floor((time() - $this->getLastPasswordChangeTS()) / 86400);
-    }
-
-    public function setLastPasswordChangeToNow(): void
-    {
-        $this->last_password_change_ts = time();
-    }
-
-    public function resetLastPasswordChange(): void
-    {
-        $this->last_password_change_ts = 0;
     }
 
     public function setAuthMode(?string $a_str): void
@@ -1233,6 +1172,11 @@ class ilObjUser extends ilObject
     public function getExternalAccount(): string
     {
         return $this->ext_account;
+    }
+
+    public function getUserAuthData(): UserAuthData
+    {
+        return $this->user_auth_data;
     }
 
     /**
@@ -2133,29 +2077,20 @@ class ilObjUser extends ilObject
     public static function _getLoginAttempts(
         int $a_usr_id
     ): int {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
+        /** @var UserAuthDataRepository $user_auth_data_repo */
+        $user_auth_data_repo = LocalDIC::dic()[UserAuthDataRepository::class];
 
-        $query = 'SELECT login_attempts FROM usr_data WHERE usr_id = %s';
-        $result = $ilDB->queryF($query, ['integer'], [$a_usr_id]);
-        $record = $ilDB->fetchAssoc($result);
-        return (int) ($record['login_attempts'] ?? 0);
+        return $user_auth_data_repo->getCount(new UserId($a_usr_id));
     }
 
     public static function _incrementLoginAttempts(
         int $a_usr_id
     ): bool {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
+        /** @var UserAuthDataRepository $user_auth_data_repo */
+        $user_auth_data_repo = LocalDIC::dic()[UserAuthDataRepository::class];
 
-        $query = 'UPDATE usr_data SET login_attempts = (login_attempts + 1) WHERE usr_id = %s';
-        $affected = $ilDB->manipulateF($query, ['integer'], [$a_usr_id]);
-
-        if ($affected) {
-            return true;
-        } else {
-            return false;
-        }
+        $user_auth_data_repo->increment(new UserId($a_usr_id));
+        return true;
     }
 
     public static function _setUserInactive(
@@ -2210,14 +2145,16 @@ class ilObjUser extends ilObject
 
         $r = $ilDB->queryF(
             $q = "
-			SELECT COUNT(user_id) num, user_id, firstname, lastname, title, login, last_login, MAX(ctime) ctime, context, agree_date
+			SELECT COUNT(user_id) num, user_id, firstname, lastname, title, login, auth_data.last_login, MAX(ctime) ctime, context, agree_date
 			FROM usr_session
 			LEFT JOIN usr_data u
 				ON user_id = u.usr_id
 			LEFT JOIN usr_pref p
 				ON (p.usr_id = u.usr_id AND p.keyword = %s)
+			LEFT JOIN usr_auth_data auth_data
+			    ON auth_data.usr_id = u.usr_id
             {$where}
-			GROUP BY user_id, firstname, lastname, title, login, last_login, context, agree_date
+			GROUP BY user_id, firstname, lastname, title, login, auth_data.last_login, context, agree_date
 			ORDER BY lastname, firstname
 			",
             ['text'],
@@ -2242,56 +2179,6 @@ class ilObjUser extends ilObject
         );
 
         return $users;
-    }
-
-    public static function getUserIdsByInactivityPeriod(
-        int $periodInDays
-    ): array {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
-
-        if ($periodInDays < 1) {
-            throw new ilException('Invalid period given');
-        }
-
-        $date = date('Y-m-d H:i:s', (time() - ($periodInDays * 24 * 60 * 60)));
-
-        $query = 'SELECT usr_id FROM usr_data WHERE last_login IS NOT NULL AND last_login < %s';
-
-        $ids = [];
-
-        $types = ['timestamp'];
-        $values = [$date];
-
-        $res = $ilDB->queryF($query, $types, $values);
-        while ($row = $ilDB->fetchAssoc($res)) {
-            $ids[] = (int) $row['usr_id'];
-        }
-
-        return $ids;
-    }
-
-    public static function getUserIdsNeverLoggedIn(
-        int $thresholdInDays
-    ): array {
-        global $DIC;
-        $ilDB = $DIC['ilDB'];
-
-        $date = date('Y-m-d H:i:s', (time() - ($thresholdInDays * 24 * 60 * 60)));
-
-        $query = 'SELECT usr_id FROM usr_data WHERE last_login IS NULL AND create_date < %s';
-
-        $ids = [];
-
-        $types = ['timestamp'];
-        $values = [$date];
-
-        $res = $ilDB->queryF($query, $types, $values);
-        while ($row = $ilDB->fetchAssoc($res)) {
-            $ids[] = (int) $row['usr_id'];
-        }
-
-        return $ids;
     }
 
     public static function _getUserIdsByInactivationPeriod(
@@ -2850,11 +2737,6 @@ class ilObjUser extends ilObject
         }
 
         return $ids;
-    }
-
-    public static function _lookupLastLogin(int $a_user_id): string
-    {
-        return self::_lookup($a_user_id, 'last_login') ?? '';
     }
 
     public static function _lookupFirstLogin(int $a_user_id): string

@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Language\Language;
 use ILIAS\Cron\Job\Schedule\JobScheduleType;
 use ILIAS\Cron\Job\JobRepository;
@@ -53,6 +54,7 @@ class ilCronDeleteInactiveUserAccounts extends CronJob
     private \ILIAS\Refinery\Factory $refinery;
     private JobRepository $cronRepository;
     private \ilGlobalTemplateInterface $main_tpl;
+    private UserAuthDataRepository $user_auth_data_repo;
 
     public function __construct()
     {
@@ -61,6 +63,7 @@ class ilCronDeleteInactiveUserAccounts extends CronJob
 
         if (isset($DIC['ilDB'])) {
             $this->cron_delete_reminder_mail = new ilCronDeleteInactiveUserReminderMail($DIC['ilDB']);
+            $this->user_auth_data_repo = new UserAuthDataRepository($DIC->database());
         }
 
         if (isset($DIC['tpl'])) {
@@ -210,14 +213,15 @@ class ilCronDeleteInactiveUserAccounts extends CronJob
     {
         $status = JobResult::STATUS_NO_ACTION;
         $check_mail = $this->delete_period - $this->reminder_period;
-        $usr_ids = ilObjUser::getUserIdsByInactivityPeriod($check_mail);
+
         $counters = [
             self::ACTION_USER_NONE => 0,
             self::ACTION_USER_REMINDER_MAIL_SENT => 0,
             self::ACTION_USER_DELETED => 0
         ];
-        foreach ($usr_ids as $usr_id) {
-            if ($usr_id === ANONYMOUS_USER_ID || $usr_id === SYSTEM_USER_ID) {
+        foreach ($this->user_auth_data_repo->getByInactivityPeriod($check_mail) as $user_auth_data) {
+            $usr_id = $user_auth_data->getUserId()->value();
+            if (in_array($usr_id, [ANONYMOUS_USER_ID, SYSTEM_USER_ID], true)) {
                 continue;
             }
 
@@ -250,8 +254,10 @@ class ilCronDeleteInactiveUserAccounts extends CronJob
 
     private function deleteUserOrSendReminderMail($usr_id): int
     {
+        /** @var ilObjUser $user */
         $user = ilObjectFactory::getInstanceByObjId($usr_id);
-        $timestamp_last_login = strtotime($user->getLastLogin());
+
+        $timestamp_last_login = $user->getUserAuthData()->getLastLoginTimestamp();
         $grace_period_over = time() - ($this->delete_period * 24 * 60 * 60);
 
         if ($timestamp_last_login < $grace_period_over) {

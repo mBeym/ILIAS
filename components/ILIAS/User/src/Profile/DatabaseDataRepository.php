@@ -144,16 +144,11 @@ class DatabaseDataRepository implements DataRepository
                 'latitude' => [\ilDBConstants::T_TEXT, $user_data->getGeoCoordinates()['latitude'] ?? null],
                 'longitude' => [\ilDBConstants::T_TEXT, $user_data->getGeoCoordinates()['longitude'] ?? null],
                 'loc_zoom' => [\ilDBConstants::T_INTEGER, $user_data->getGeoCoordinates()['zoom'] ?? 0],
-                'last_password_change' => [\ilDBConstants::T_INTEGER, $system_information['last_password_change']],
                 'passwd' => [\ilDBConstants::T_TEXT, $system_information['passwd']],
                 'passwd_salt' => [\ilDBConstants::T_TEXT, $system_information['passwd_salt']],
                 'passwd_enc_type' => [\ilDBConstants::T_TEXT, $system_information['passwd_enc_type']],
                 'passwd_policy_reset' => [\ilDBConstants::T_INTEGER, $system_information['passwd_policy_reset'] ? 1 : 0],
                 'client_ip' => [\ilDBConstants::T_TEXT, $system_information['client_ip']],
-                'last_login' => [
-                    \ilDBConstants::T_TIMESTAMP,
-                    $system_information['last_login'] !== '' ? $system_information['last_login'] : null
-                ],
                 'first_login' => [
                     \ilDBConstants::T_TIMESTAMP,
                     $system_information['first_login'] !== '' ? $system_information['first_login'] : null
@@ -361,14 +356,11 @@ class DatabaseDataRepository implements DataRepository
                 []
             )
         ))->withSystemInformation([
-            'last_password_change' => $base_data->last_password_change,
-            'login_attempts' => $base_data->login_attempts,
             'passwd' => $base_data->passwd,
             'passwd_salt' => $base_data->passwd_salt,
             'passwd_enc_type' => $base_data->passwd_enc_type,
             'passwd_policy_reset' => $base_data->passwd_policy_reset === 1,
             'client_ip' => $base_data->client_ip ?? '',
-            'last_login' => $base_data->last_login ?? '',
             'first_login' => $base_data->first_login ?? '',
             'last_profile_prompt' => $base_data->last_profile_prompt ?? '',
             'active' => $base_data->active,

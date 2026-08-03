@@ -557,7 +557,7 @@ class ilUserTableGUI extends ilTable2GUI
                 $this->tpl->setCurrentBlock('last_login');
                 $this->tpl->setVariable(
                     'VAL_LAST_LOGIN',
-                    ilDatePresentation::formatDate(new ilDateTime($a_set['last_login'], IL_CAL_DATETIME))
+                    ilDatePresentation::formatDate(new ilDateTime($a_set['last_login'], IL_CAL_UNIX))
                 );
             } elseif (in_array($c, ['firstname', 'lastname'])) {
                 $this->tpl->setCurrentBlock($c);
