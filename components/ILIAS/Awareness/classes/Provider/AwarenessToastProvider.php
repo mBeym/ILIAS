@@ -61,7 +61,7 @@ class AwarenessToastProvider extends AbstractToastProvider
 
         $new_user_ids = [];
         foreach ($users as $id => $user) {
-            $time = (new ilDateTime($user['last_login'], IL_CAL_DATETIME, $this->dic->user()->getTimeZone()))->getUnixTime();
+            $time = (new ilDateTime($user['last_login'], IL_CAL_UNIX, $this->dic->user()->getTimeZone()))->getUnixTime();
             if ($time >= (time() - ($this->dic->http()->request()->getQueryParams()['max_age'] ?? 0))) {
                 $new_user_ids[] = $id;
             }

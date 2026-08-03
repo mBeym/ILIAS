@@ -18,6 +18,8 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
+
 /**
 * Class ilObjGroup
 *
@@ -850,8 +852,9 @@ class ilObjGroup extends ilContainer implements ilMembershipRegistrationCodes
     public function getGroupMemberData(array $a_mem_ids, int $active = 1): array
     {
         $usr_arr = array();
-        $q = "SELECT login,firstname,lastname,title,usr_id,last_login " .
+        $q = "SELECT login,firstname,lastname,title,usr_id, auth_data.last_login " .
              "FROM usr_data " .
+             'LEFT JOIN ' . UserAuthDataRepository::USER_AUTH_DATA_TABLE_NAME . ' auth_data ON auth_data.usr_id = usr_data.usr_id ' .
              "WHERE usr_id IN (" . implode(',', ilArrayUtil::quoteArray($a_mem_ids)) . ") ";
 
         if (is_numeric($active) && $active > -1) {

@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\Registration\DualOptIn\Repository\PendingRegistrationDatabaseRepository;
 use ILIAS\Registration\DualOptIn\Service\DualOptInServiceImpl;
 
@@ -463,6 +464,7 @@ class ilSoapUtils extends ilSoapAdministration
         $dual_opt_in_service = new DualOptInServiceImpl(
             new ilRegistrationSettings(),
             new PendingRegistrationDatabaseRepository($DIC->database()),
+            new UserAuthDataRepository($DIC->database()),
             $DIC->database(),
             $DIC->logger()->user(),
             (new \ILIAS\Data\Factory())->clock()

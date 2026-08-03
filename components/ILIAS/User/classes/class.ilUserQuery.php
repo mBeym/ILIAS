@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\User\LocalDIC;
 use ILIAS\User\Profile\DataQuery;
 use ILIAS\User\Profile\Fields\ConfigurationRepository as ProfileFieldsConfigurationRepository;
@@ -49,7 +50,6 @@ class ilUserQuery
         'time_limit_until',
         'time_limit_unlimited',
         'time_limit_owner',
-        'last_login',
         'active'
     ];
 
@@ -271,7 +271,7 @@ class ilUserQuery
                 array_reduce(
                     $this->additional_fields,
                     function (DataQuery $c, string $v): DataQuery {
-                        if (in_array($v, self::DEFAULT_FIELDS)) {
+                        if (in_array($v, [...self::DEFAULT_FIELDS, 'last_login'], true)) {
                             return $c;
                         }
 
@@ -306,6 +306,12 @@ class ilUserQuery
             )->withLimitedUsers($this->users)
         );
 
+        $query = $query
+            ->withAdditionalAdditionalTableSelectField('auth_data.last_login')
+            ->withAdditionalJoin(
+                'LEFT JOIN ' . UserAuthDataRepository::USER_AUTH_DATA_TABLE_NAME . ' auth_data ON auth_data.usr_id = usr_data.usr_id'
+            );
+
         if ($this->first_letter !== '') {
             $query = $query->withAdditionalWhere(
                 "({$this->db->upper($this->db->substr('usr_data.lastname', 1, 1))})"
@@ -336,9 +342,10 @@ class ilUserQuery
 
         if ($this->last_login instanceof ilDateTime) {	// last login
             if (ilDateTime::_before($this->last_login, new ilDateTime(time() + (60 * 60 * 24), IL_CAL_UNIX), IL_CAL_DAY)) {
-                $query = $query->withAdditionalWhere(
-                    "usr_data.last_login < {$this->db->quote($this->last_login->get(IL_CAL_DATETIME), ilDBConstants::T_TIMESTAMP)}"
-                );
+                $query = $query->withAdditionalWhere(sprintf(
+                    "usr_data.usr_id IN (SELECT usr_id FROM usr_auth_data WHERE usr_auth_data.last_login < %s)",
+                    $this->db->quote($this->last_login->get(IL_CAL_UNIX), ilDBConstants::T_TIMESTAMP)
+                ));
             }
         }
         if ($this->limited_access) {

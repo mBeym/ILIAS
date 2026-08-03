@@ -18,6 +18,8 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
+use ILIAS\Authentication\Login\UserId;
 use ILIAS\User\LocalDIC;
 use ILIAS\User\UserGUIRequest;
 use ILIAS\User\Presentation\AdminTabs;
@@ -547,7 +549,10 @@ class ilObjUserFolderGUI extends ilObjectGUI
             );
             if ($obj instanceof \ilObjUser) {
                 if (!$obj->getActive()) {
-                    $obj->setLoginAttempts(0);
+                    /** @var UserAuthDataRepository $user_auth_data_repo */
+                    $user_auth_data_repo = LocalDIC::dic()[UserAuthDataRepository::class];
+                    $user_auth_data_repo->reset(new UserId($obj->getId()));
+                    $obj->getUserAuthData()->setLoginAttempts(0);
                 }
                 $obj->setActive(
                     true,
@@ -943,14 +948,14 @@ class ilObjUserFolderGUI extends ilObjectGUI
         foreach ($user_ids as $id) {
             $user = new ilObjUser((int) $id);
 
-            $login = $user->getLastLogin();
+            $login = $user->getUserAuthData()->getLastLogin();
             if (!$login) {
                 $login = $this->lng->txt('never');
             } else {
                 $login = ilDatePresentation::formatDate(
                     new ilDateTime(
-                        $login,
-                        IL_CAL_DATETIME
+                        $login->getTimestamp(),
+                        IL_CAL_UNIX
                     )
                 );
             }

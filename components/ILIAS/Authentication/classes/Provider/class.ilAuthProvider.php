@@ -18,16 +18,20 @@
 
 declare(strict_types=1);
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
+
 abstract class ilAuthProvider implements ilAuthProviderInterface
 {
     private ilLogger $logger;
     private ilAuthCredentials $credentials;
+    private UserAuthDataRepository $user_auth_data_repo;
 
     public function __construct(ilAuthCredentials $credentials)
     {
         global $DIC;
         $this->logger = $DIC->logger()->auth();
         $this->credentials = $credentials;
+        $this->user_auth_data_repo = new UserAuthDataRepository($DIC->database());
     }
 
     public function getLogger(): ilLogger
@@ -38,6 +42,11 @@ abstract class ilAuthProvider implements ilAuthProviderInterface
     public function getCredentials(): ilAuthCredentials
     {
         return $this->credentials;
+    }
+
+    public function getUserAuthDataRepo(): UserAuthDataRepository
+    {
+        return $this->user_auth_data_repo;
     }
 
     protected function handleAuthenticationFail(ilAuthStatus $status, string $a_reason): bool

@@ -209,7 +209,7 @@ class ilRepositoryUserResultTableGUI extends ilTable2GUI
                     break;
 
                 case 'last_login':
-                    $a_set['last_login'] = $a_set['last_login'] ? ilDatePresentation::formatDate(new ilDateTime($a_set['last_login'], IL_CAL_DATETIME)) : $this->lng->txt('no_date');
+                    $a_set['last_login'] = $a_set['last_login'] ? ilDatePresentation::formatDate(new ilDateTime($a_set['last_login'], IL_CAL_UNIX)) : $this->lng->txt('no_date');
                     $this->tpl->setCurrentBlock('custom_fields');
                     $this->tpl->setVariable('VAL_CUST', $a_set[$field]);
                     $this->tpl->parseCurrentBlock();

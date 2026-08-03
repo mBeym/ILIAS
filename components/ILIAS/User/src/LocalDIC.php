@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace ILIAS\User;
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
 use ILIAS\User\Search\EndpointFactory;
 use ILIAS\User\Search\Search;
 use ILIAS\User\Settings\Settings as UserSettings;
@@ -179,5 +180,8 @@ class LocalDIC extends PimpleContainer
         );
         $this[NewAccountMailRepository::class] = fn($c): NewAccountMailRepository =>
             new NewAccountMailRepository($DIC['ilDB']);
+
+        $this[UserAuthDataRepository::class] = fn($c): UserAuthDataRepository =>
+        new UserAuthDataRepository($DIC['ilDB']);
     }
 }

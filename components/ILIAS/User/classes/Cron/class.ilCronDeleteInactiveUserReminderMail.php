@@ -16,6 +16,9 @@
  *
  *********************************************************************/
 
+use ILIAS\Authentication\Login\Repository\UserAuthDataRepository;
+use ILIAS\Authentication\Login\UserId;
+
 /**
  * This checks if a mail has to be send after a certain INACTIVITY period
  * @author  Guido Vollbach <gvollbach@databay.de>
@@ -24,9 +27,13 @@ class ilCronDeleteInactiveUserReminderMail
 {
     public const TABLE_NAME = "usr_cron_mail_reminder";
 
+    private UserAuthDataRepository $user_auth_data_repo;
+
     public function __construct(
         private ilDBInterface $db
-    ) {
+    )
+    {
+        $this->user_auth_data_repo = new UserAuthDataRepository($db);
     }
 
     public function removeEntriesFromTableIfLastLoginIsNewer(): void
@@ -39,10 +46,21 @@ class ilCronDeleteInactiveUserReminderMail
             'usr_id',
             'ts'
         ]);
+
+        $user_ids_ts_map = [];
+
         while ($row = $res->fetchRow(ilDBConstants::FETCHMODE_OBJECT)) {
-            $lastLoginUnixtime = strtotime(ilObjUser::_lookupLastLogin($row->usr_id));
-            $lastReminderSent = (int) $row->ts;
-            if ($lastLoginUnixtime >= $lastReminderSent) {
+            $user_ids_ts_map[(int) $row->usr_id] = (int) $row->ts;
+        }
+
+        foreach ($this->user_auth_data_repo->getForIds(array_map(static function (int $user_id): UserId {
+            return new UserId($user_id);
+        }, array_keys($user_ids_ts_map))) as $user_auth_data) {
+            $ts = $user_ids_ts_map[$user_auth_data->getUserId()->value()] ?? null;
+            if ($ts === null) {
+                continue;
+            }
+            if ($user_auth_data->getLastLoginTimestamp() >= $ts) {
                 $this->removeSingleUserFromTable($row->usr_id);
             }
         }
